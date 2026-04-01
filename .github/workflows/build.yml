@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@main
 
       - name: Checkout roothide/theos
+        id: checkout_theos
         uses: actions/checkout@main
         with:
           repository: roothide/theos
@@ -19,22 +20,55 @@ jobs:
           path: theos
 
       - name: Checkout theos/sdks
+        id: checkout_sdks
+        if: steps.checkout_theos.outcome == 'success'
         uses: actions/checkout@main
         with:
           repository: roothide/theos
           sparse-checkout: iPhoneOS16.5.sdk
           path: theos/sdks
-
-      - name: Build Package
+      
+      - name: Install Dependencies
+        id: install_deps
+        if: steps.checkout_sdks.outcome == 'success'
         run: |
-          brew install make xz ldid
-          export THEOS=theos
+          brew install make ldid
           chmod +x layout/DEBIAN/*
-          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
-          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
 
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v7.0.0
+      - name: Build Rootless Package
+        id: build_rootless
+        if: steps.install_deps.outcome == 'success'
+        env:
+          THEOS_PACKAGE_SCHEME: rootless
+          THEOS: theos
+          FINALPACKAGE: 1
+        run: |
+          gmake clean package
+
+      - name: Upload a Rootless Build Artifact
+        if: steps.build_rootless.outcome == 'success'
+        uses: actions/upload-artifact@v7
         with:
+          name: rootless-package
+          path: packages/rootless/*.deb
+          retention-days: 15
           archive: false
-          path: packages/*.deb
+  
+      - name: Build Roothide Package
+        id: build_roothide
+        if: steps.install_deps.outcome == 'success'
+        env:
+          THEOS_PACKAGE_SCHEME: roothide
+          THEOS: theos
+          FINALPACKAGE: 1
+        run: |
+          gmake clean package
+      
+      - name: Upload a Roothide Build Artifact
+        if: steps.build_roothide.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: roothide-package
+          path: packages/roothide/*.deb
+          retention-days: 15
+          archive: false
