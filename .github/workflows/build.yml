@@ -21,7 +21,7 @@ jobs:
       - name: Checkout theos/sdks
         uses: actions/checkout@main
         with:
-          repository: theos/sdks
+          repository: roothide/theos
           sparse-checkout: iPhoneOS16.5.sdk
           path: theos/sdks
 
