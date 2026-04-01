@@ -10,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@main
 
-      - name: Checkout theos/theos
+      - name: Checkout roothide/theos
         uses: actions/checkout@main
         with:
-          repository: theos/theos
+          repository: roothide/theos
           ref: master
           submodules: recursive
           path: theos
