@@ -39,11 +39,9 @@ jobs:
         id: build_rootless
         if: steps.install_deps.outcome == 'success'
         env:
-          THEOS_PACKAGE_SCHEME: rootless
           THEOS: theos
-          FINALPACKAGE: 1
         run: |
-          gmake clean package
+          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
 
       - name: Upload a Rootless Build Artifact
         if: steps.build_rootless.outcome == 'success'
@@ -58,11 +56,9 @@ jobs:
         id: build_roothide
         if: steps.install_deps.outcome == 'success'
         env:
-          THEOS_PACKAGE_SCHEME: roothide
           THEOS: theos
-          FINALPACKAGE: 1
         run: |
-          gmake clean package
+          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
       
       - name: Upload a Roothide Build Artifact
         if: steps.build_roothide.outcome == 'success'
