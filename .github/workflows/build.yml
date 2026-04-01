@@ -29,6 +29,7 @@ jobs:
         run: |
           brew install make xz ldid
           export THEOS=theos
+          chmod +x layout/DEBIAN/*
           gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless
           gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=roothide
 
