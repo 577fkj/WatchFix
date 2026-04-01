@@ -1,0 +1,3 @@
+
+void InstallAppConduitHook();
+void InstallAppsSupportHooks();

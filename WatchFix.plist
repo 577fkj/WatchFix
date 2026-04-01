@@ -1,0 +1,13 @@
+{ 
+    Filter = {
+        Bundles = (
+            "com.apple.InstalledContentLibrary"
+        );
+        Executables = (
+            "apsd",
+            "installd",
+            "appconduitd",
+            "com.apple.MobileInstallationHelperService"
+        );
+    };
+}

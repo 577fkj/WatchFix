@@ -1,0 +1,17 @@
+#include <stdarg.h>
+#include <syslog.h>
+
+#define LOG_PREFIX "[WatchFix][%s] "
+
+void CLog(const char *file, const char *format, ...);
+const char *CStringOrPlaceholder(NSString *value);
+id CopyObjectIvarValueByName(id object, const char *name, Class expectedClass);
+BOOL HookInstanceMethod(Class cls, SEL originalSelector, SEL replacementSelector);
+bool is_equal(const char *s1, const char *s2);
+bool starts_with(const char *pre, const char *str);
+
+#define Log(format, ...) CLog(__FILE__, format, ##__VA_ARGS__)
+
+// Use NSString alloc/initWithUTF8String: to create NSString from C string
+// But why? why? why??? why @"string" and CFSTR doesn't work? why EXC_BAD_ACCESS? --- IGNORE ---
+#define NSSTR(str) [[NSString alloc] initWithUTF8String:str]
