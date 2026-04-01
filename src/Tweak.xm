@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 #import "plugins/APSSupport.h"
+#import "plugins/PairingCompatibility.h"
 #import "plugins/AppsSupport.h"
 
 %ctor {
@@ -31,5 +32,13 @@
             is_equal(progname, "com.apple.MobileInstallationHelperService")) {
         Log("Initializing AppsSupport...");
         InstallAppsSupportHooks();
+    }
+    else if (is_equal(progname, "nanoregistryd")) {
+        Log("Initializing PairingCompatibility...");
+        InitNanoRegisterPairingCompatibilityHooks();
+    }
+    else if (is_equal(progname, "identityservicesd")) {
+        Log("Initializing IdServicePairingCompatibility...");
+        InitIdServicePairingCompatibilityHooks();
     }
 }

@@ -6,6 +6,7 @@ The stability still needs to be tested
 
 - Fix Message auto uninstall
 - Fix Wallet card management (Maybe)
+- Fix Pairing (No test)
 
 ## Unimplemented feature
 
@@ -14,7 +15,6 @@ The stability still needs to be tested
 - Media Sync
 - Photo Sync
 - Maps Fix
-- Pairing Fix
 - Cellular Fix
 - Lockdown Mode
 - Health Support

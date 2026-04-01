@@ -1,8 +1,28 @@
 #!/bin/bash
 
-launchctl kill 9 user/501/com.apple.apsd
-launchctl kill 9 user/501/com.apple.appconduitd
-launchctl kill 9 user/501/com.apple.MobileInstallationHelperService
-killall -9 installd
+GUI_SERVICES=(
+    "com.apple.apsd"
+    "com.apple.appconduitd"
+    "com.apple.MobileInstallationHelperService"
+    "com.apple.identityservicesd"
+    "com.apple.nanoregistryd"
+)
 
+SYS_SERVICES=(
+    "installd"
+)
+
+echo "WatchFix: Terminating processes..."
+
+for service in "${GUI_SERVICES[@]}"; do
+    echo "Terminating $service..."
+    launchctl kill 9 user/501/"$service" 2>/dev/null
+done
+
+for service in "${SYS_SERVICES[@]}"; do
+    echo "Terminating $service..."
+    killall -9 "$service" 2>/dev/null
+done
+
+echo "WatchFix: Done."
 exit 0

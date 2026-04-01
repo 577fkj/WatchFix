@@ -1,13 +1,16 @@
 { 
     Filter = {
         Bundles = (
-            "com.apple.InstalledContentLibrary"
+            "com.apple.InstalledContentLibrary",
+            "com.apple.private.NanoRegistry"
         );
         Executables = (
             "apsd",
             "installd",
             "appconduitd",
-            "com.apple.MobileInstallationHelperService"
+            "com.apple.MobileInstallationHelperService",
+            "nanoregistryd",
+            "identityservicesd"
         );
     };
 }
