@@ -17,6 +17,7 @@ THEOS_DEVICE_PORT = 22
 TWEAK_NAME = WatchFix
 $(TWEAK_NAME)_FILES = $(shell find src \( -name '*.m' -o -name '*.xm' -o -name '*.x' -o -name '*.xi' \))
 $(TWEAK_NAME)_CFLAGS = -fobjc-arc
+$(TWEAK_NAME)_PRIVATE_FRAMEWORKS = BridgePreferences NanoRegistry PBBridgeSupport
 
 include $(THEOS)/makefiles/common.mk
 include $(THEOS_MAKE_PATH)/tweak.mk

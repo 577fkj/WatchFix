@@ -7,9 +7,8 @@
 #include <string.h>
 #include "../utils/utils.h"
 
-static long long minPairingCompatibilityVersionWithChipID = 1;
-static long long minCompatibilityVersion = 1;
-static long long maxCompatibilityVersion = 40;
+static long long minCompatibilityVersion = 4;
+static long long maxCompatibilityVersion = 24;
 
 %group PairingDaemoFix
 
@@ -55,12 +54,12 @@ static long long maxCompatibilityVersion = 40;
     Log("Original VersionInfo minPairingCompatibilityVersionWithChipID called");
     long long originalVersion = %orig;
     Log("Original VersionInfo min compatibility version with chip ID: %lld", originalVersion);
-    return minPairingCompatibilityVersionWithChipID;
+    return minCompatibilityVersion;
 }
 
 - (long long)minPairingCompatibilityVersionForChipID:(id)chipID name:(NSString *)name defaultVersion:(long long)defaultVersion {
     Log("Original VersionInfo minPairingCompatibilityVersionForChipID:name:defaultVersion: called with chipID: %u, name: %s, defaultVersion: %lld", chipID, CStringOrPlaceholder(name), defaultVersion);
-    return defaultVersion;
+    return minCompatibilityVersion;
 }
 
 %end
@@ -69,7 +68,7 @@ static long long maxCompatibilityVersion = 40;
 
 %group IdServicePairingFix
 
-%hook IDSUTunControlMessage_Hello
+%hook IDSHello
 
 -(void)setServiceMinCompatibilityVersion:(NSNumber *)serviceMinCompatibilityVersion {
     Log("Called setServiceMinCompatibilityVersion");
@@ -98,6 +97,7 @@ void InitFrameworkCompatibilityHooks(void) {
         return;
     }
     
+    Log("Initializing VersionInfo hooks...");
     %init(PairingFrameworkFix, VersionInfo=versionInfoClass);
 }
 
@@ -109,6 +109,7 @@ void InitNanoRegisterPairingCompatibilityHooks(void) {
     }
     isHookerInitialized = true;
 
+    Log("Looking up NRPairingDaemon class...");
     %init(PairingDaemoFix);
 
     InitFrameworkCompatibilityHooks();
@@ -122,7 +123,13 @@ void InitIdServicePairingCompatibilityHooks(void) {
     }
     isHookerInitialized = true;
 
-    %init(IdServicePairingFix);
+    Class IDSHelloClass = objc_lookUpClass("IDSUTunControlMessage_Hello");
+    if (IDSHelloClass) {
+        Log("Found IDSUTunControlMessage_Hello class, initializing IdServicePairingFix hooks...");
+        %init(IdServicePairingFix, IDSHello=IDSHelloClass);
+    } else {
+        Log("IDSUTunControlMessage_Hello class not found, skipping IdServicePairingFix hooks");
+    }
 
     InitFrameworkCompatibilityHooks();
 }

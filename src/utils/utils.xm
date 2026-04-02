@@ -48,3 +48,11 @@ bool starts_with(const char *pre, const char *str) {
     if (!pre || !str) return false;
     return strncmp(pre, str, strlen(pre)) == 0;
 }
+
+bool is_empty(const char *str) {
+    return !str || str[0] == '\0';
+}
+
+bool isOSVersionAtLeast(int major, int minor, int patch) {
+    return [[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:(NSOperatingSystemVersion){major, minor, patch}];
+}

@@ -7,6 +7,7 @@ The stability still needs to be tested
 - Fix Message auto uninstall
 - Fix Wallet card management (Maybe)
 - Fix Pairing (No test)
+- System Update (No test)
 
 ## Unimplemented feature
 
@@ -19,7 +20,6 @@ The stability still needs to be tested
 - Lockdown Mode
 - Health Support
 - Ping My Watch
-- System Update
 
 ## Tips
 

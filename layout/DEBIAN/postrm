@@ -10,6 +10,8 @@ GUI_SERVICES=(
 
 SYS_SERVICES=(
     "installd"
+    "SharingViewService"
+    "Bridge"
 )
 
 echo "WatchFix: Terminating processes..."

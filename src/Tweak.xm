@@ -8,6 +8,7 @@
 #import "plugins/APSSupport.h"
 #import "plugins/PairingCompatibility.h"
 #import "plugins/AppsSupport.h"
+#import "plugins/WatchAppSupport.h"
 
 %ctor {
     const char *progname = getprogname();
@@ -16,7 +17,8 @@
     }
 
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    Log("Bundle ID   : %s", CStringOrPlaceholder(bundleID));
+    const char *bundleIDCString = [bundleID UTF8String];
+    Log("Bundle ID   : %s", bundleIDCString);
     Log("Program Name: %s", progname);
 
     if (is_equal(progname, "apsd")) {
@@ -40,5 +42,11 @@
     else if (is_equal(progname, "identityservicesd")) {
         Log("Initializing IdServicePairingCompatibility...");
         InitIdServicePairingCompatibilityHooks();
+    }
+    else if (is_equal(bundleIDCString, "com.apple.Bridge") ||
+             is_equal(bundleIDCString, "com.apple.SharingViewService") ||
+             is_equal(progname, "SharingViewService")) {
+        Log("Initializing WatchAppSupport...");
+        InitWatchAppSupportHooks();
     }
 }
