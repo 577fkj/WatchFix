@@ -3,6 +3,7 @@ name: Build CI
 on:
   push:
     paths:
+      - ".github/workflows/**"
       - "src/**"
       - "layout/**"
       - "Makefile"
@@ -30,7 +31,7 @@ jobs:
         if: steps.checkout_theos.outcome == 'success'
         uses: actions/checkout@main
         with:
-          repository: roothide/theos
+          repository: theos/sdks
           sparse-checkout: iPhoneOS16.5.sdk
           path: theos/sdks
       

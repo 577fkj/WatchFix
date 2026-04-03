@@ -1,4 +1,4 @@
-TARGET := iphone:clang:latest:15.0
+TARGET := iphone:clang:16.5:15.0
 ARCHS = arm64 arm64e
 # INSTALL_TARGET_PROCESSES = apsd installd appconduitd com.apple.MobileInstallationHelperService
 THEOS_PACKAGE_SCHEME=roothide
