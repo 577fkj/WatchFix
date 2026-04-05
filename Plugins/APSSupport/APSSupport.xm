@@ -1,28 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
-#include "../utils/utils.h"
-
-@interface APSIDSProxyManager : NSObject
-- (void)sendProxyIsConnected:(BOOL)isConnected guid:(NSString *)guid environmentName:(NSString *)environmentName;
-@end
-
-@interface APSEnvironment : NSObject
-- (NSString *)name;
-@end
-
-@interface APSProxyClient : NSObject
-- (BOOL)isActive;
-- (BOOL)isConnectedOnInterface:(int)interface;
-- (BOOL)needsToDisconnectOnInterface:(int)interface;
-- (APSIDSProxyManager *)proxyManager;
-- (void)incomingPresenceWithCertificate:(NSData *)certificate
-                                  nonce:(NSData *)nonce
-                              signature:(NSData *)signature
-                                  token:(NSData *)token
-                              hwVersion:(NSString *)hwVersion
-                              swVersion:(NSString *)swVersion
-                                swBuild:(NSString *)swBuild;
-@end
+#include "APSSupport.h"
+#include "utils.h"
 
 static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
     if (![client isActive]) {
@@ -100,7 +79,21 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
 
 %end
 
-
 void InitAPSSupportHooks(void) {
     %init(APSSupport);
+}
+
+%ctor {
+    const char *progname = getprogname();
+    if (!progname) {
+        return;
+    }
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    const char *bundleIDCString = [bundleID UTF8String];
+    Log("Bundle ID   : %s", bundleIDCString);
+    Log("Program Name: %s", progname);
+    if (is_equal(progname, "apsd")) {
+        Log("Initializing APSSupport...");
+        InitAPSSupportHooks();
+    }
 }

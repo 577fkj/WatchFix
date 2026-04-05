@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include "../utils/utils.h"
+#include "utils.h"
 
 static long long minCompatibilityVersion = 4;
 static long long maxCompatibilityVersion = 24;
@@ -132,4 +132,23 @@ void InitIdServicePairingCompatibilityHooks(void) {
     }
 
     InitFrameworkCompatibilityHooks();
+}
+
+%ctor {
+    const char *progname = getprogname();
+    if (!progname) {
+        return;
+    }
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    const char *bundleIDCString = [bundleID UTF8String];
+    Log("Bundle ID   : %s", bundleIDCString);
+    Log("Program Name: %s", progname);
+    if (is_equal(progname, "nanoregistryd")) {
+        Log("Initializing PairingCompatibility...");
+        InitNanoRegisterPairingCompatibilityHooks();
+    }
+    else if (is_equal(progname, "identityservicesd")) {
+        Log("Initializing IdServicePairingCompatibility...");
+        InitIdServicePairingCompatibilityHooks();
+    }
 }

@@ -1,7 +1,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
-#include "../utils/utils.h"
+#include "utils.h"
 
 @interface WatchBundle : NSObject
 - (BOOL)isApplicableToOSVersion:(id)version error:(id *)error;
@@ -77,4 +77,24 @@ void InstallAppsSupportHooks(void) {
     %init(AppsSupport, WatchBundle=watchBundleClass);
 
     Log("Installed AppsSupport hooks");
+}
+
+%ctor {
+    const char *progname = getprogname();
+    if (!progname) {
+        return;
+    }
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    const char *bundleIDCString = [bundleID UTF8String];
+    Log("Bundle ID   : %s", bundleIDCString);
+    Log("Program Name: %s", progname);
+    if (is_equal(progname, "appconduitd")) {
+        Log("Initializing AppsSupport...");
+        InstallAppConduitHook();
+    } else if (is_equal(progname, "installd") ||
+        is_equal(progname, "MobileInstallationHelperService") ||
+        is_equal(progname, "com.apple.MobileInstallationHelperService")) {
+        Log("Initializing AppsSupport...");
+        InstallAppsSupportHooks();
+    }
 }

@@ -1,2 +1,0 @@
-void InitNanoRegisterPairingCompatibilityHooks(void);
-void InitIdServicePairingCompatibilityHooks(void);

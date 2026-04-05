@@ -1,0 +1,8 @@
+{ 
+    Filter = {
+        Bundles = (
+            "com.apple.Bridge",
+            "com.apple.SharingViewService"
+        );
+    };
+}

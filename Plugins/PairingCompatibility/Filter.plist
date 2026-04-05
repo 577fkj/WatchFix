@@ -1,0 +1,11 @@
+{ 
+    Filter = {
+        Bundles = (
+            "com.apple.private.NanoRegistry"
+        );
+        Executables = (
+            "nanoregistryd",
+            "identityservicesd"
+        );
+    };
+}
