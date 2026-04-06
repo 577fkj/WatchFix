@@ -9,6 +9,7 @@ The stability still needs to be tested
 - Fix Pairing (No test)
 - System Update (No test)
 - Cellular Fix (No test)
+- Lockdown Mode (No test)
 
 ## Unimplemented feature
 
@@ -17,7 +18,6 @@ The stability still needs to be tested
 - Media Sync
 - Photo Sync
 - Maps Fix
-- Lockdown Mode
 - Health Support
 - Ping My Watch
 
