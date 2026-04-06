@@ -14,10 +14,10 @@ The stability still needs to be tested
 - Cellular Fix
 - Lockdown Mode
 - Watch Face Support
+- Layout Support
 
 ## Unimplemented feature
 
-- Layout Support
 - Media Sync
 - Photo Sync
 - Maps Fix

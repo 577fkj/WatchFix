@@ -689,10 +689,11 @@ static void WatchFixInstallWatchFaceSupportHooks(void) {
     }
 
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    Log("Bundle ID   : %s", CStringOrPlaceholder(bundleID));
+    const char *bundleIDCString = [bundleID UTF8String];
+    Log("Bundle ID   : %s", bundleIDCString);
     Log("Program Name: %s", progname);
 
-    if (!is_equal(progname, "Bridge") && !is_equal(progname, "nanotimekitcompaniond")) {
+    if (!is_equal(bundleIDCString, "com.apple.Bridge") && !is_equal(progname, "nanotimekitcompaniond")) {
         return;
     }
 
