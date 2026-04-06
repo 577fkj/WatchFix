@@ -15,10 +15,10 @@ The stability still needs to be tested
 - Watch Face Support
 - Layout Support
 - Photo Sync
+- Media Sync
 
 ## Unimplemented feature
 
-- Media Sync
 - Maps Fix
 - Health Support
 - Ping My Watch
