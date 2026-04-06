@@ -6,6 +6,7 @@ GUI_SERVICES=(
     "com.apple.MobileInstallationHelperService"
     "com.apple.identityservicesd"
     "com.apple.nanoregistryd"
+    "com.apple.CommCenter"
 )
 
 SYS_SERVICES=(

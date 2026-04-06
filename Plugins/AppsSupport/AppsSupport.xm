@@ -15,14 +15,9 @@
     Log("Original _supplementalSystemAppBundleIDMappingForWatchOSSixAndLater called");
     NSDictionary *result = %orig;
     NSMutableDictionary *mapping = [result mutableCopy] ?: [NSMutableDictionary dictionary];
-    NSString *sms = NSSTR("com.apple.MobileSMS");
+    NSString *sms = @"com.apple.MobileSMS";
     [mapping setObject:sms forKey:sms];
     Log("Add Success");
-    Log("Final mapping dictionary count: %lu", (unsigned long)[mapping count]);
-    for (NSString *key in mapping) {
-        NSString *value = [mapping objectForKey:key];
-        Log("  %s => %s", [key UTF8String], [value UTF8String]);
-    }
     return mapping;
 }
 
@@ -45,11 +40,11 @@
 %hook WatchBundle
 
 - (BOOL)isApplicableToKnownWatchOSVersion {
-    return [self isApplicableToOSVersion:NSSTR("11.9999") error:nil];
+    return [self isApplicableToOSVersion:@"11.9999" error:nil];
 }
 
 - (NSString *)currentOSVersionForValidationWithError:(id *)error {
-    return NSSTR("11.9999");
+    return @"11.9999";
 }
 
 %end

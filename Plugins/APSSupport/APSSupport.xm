@@ -57,7 +57,7 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
     }
 
     NSString *guid = CopyObjectIvarValueByName(self, "_guid", [NSString class]);
-    APSEnvironment *environment = CopyObjectIvarValueByName(self, "_environment", NSClassFromString(NSSTR("APSEnvironment")));
+    APSEnvironment *environment = CopyObjectIvarValueByName(self, "_environment", NSClassFromString(@"APSEnvironment"));
     NSString *environmentName = [environment name];
     APSIDSProxyManager *proxyManager = [self proxyManager];
 
@@ -79,10 +79,6 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
 
 %end
 
-void InitAPSSupportHooks(void) {
-    %init(APSSupport);
-}
-
 %ctor {
     const char *progname = getprogname();
     if (!progname) {
@@ -94,6 +90,6 @@ void InitAPSSupportHooks(void) {
     Log("Program Name: %s", progname);
     if (is_equal(progname, "apsd")) {
         Log("Initializing APSSupport...");
-        InitAPSSupportHooks();
+        %init(APSSupport);
     }
 }

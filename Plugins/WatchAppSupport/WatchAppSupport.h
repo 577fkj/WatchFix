@@ -5,11 +5,11 @@
 typedef unsigned long long WatchFixNRDeviceSize;
 typedef unsigned long long WatchFixPBBDeviceSize;
 
-typedef struct {
-    char familyName[32];
-    NSInteger major;
-    NSInteger minor;
-} WatchFixProductVersion;
+@interface WatchFixProductVersion : NSObject
+@property (nonatomic, copy) NSString *familyName;
+@property (nonatomic, assign) NSInteger major;
+@property (nonatomic, assign) NSInteger minor;
+@end
 
 extern NSString *NRDevicePropertyProductType;
 extern NSString *PBBridgeAdvertisingSizeKey;

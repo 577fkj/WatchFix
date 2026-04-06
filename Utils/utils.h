@@ -14,6 +14,3 @@ bool isOSVersionAtLeast(int major, int minor, int patch);
 
 #define Log(format, ...) CLog(__FILE__, format, ##__VA_ARGS__)
 
-// Use NSString alloc/initWithUTF8String: to create NSString from C string
-// But why? why? why??? why @"string" and CFSTR doesn't work? why EXC_BAD_ACCESS? --- IGNORE ---
-#define NSSTR(str) [[NSString alloc] initWithUTF8String:str]

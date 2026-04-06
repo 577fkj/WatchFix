@@ -1,77 +1,50 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
-#include <string.h>
-#include <substrate.h>
-#include "WatchAppSupport.h"
-#include "utils.h"
+#import <substrate.h>
+#import "WatchAppSupport.h"
+#import "utils.h"
 
 static BOOL watchFixProgressAndControllerSizeGuard = YES;
 
-static BOOL WatchFixParseProductVersion(NSString *productType, WatchFixProductVersion *version) {
-    if (!productType || !version) {
-        return NO;
+@implementation WatchFixProductVersion
+@end
+
+static WatchFixProductVersion *WatchFixParseProductVersion(NSString *productType) {
+    if (productType.length == 0) {
+        return NULL;
     }
 
-    const char *s = [productType UTF8String];
-    if (!s) {
-        return NO;
+    static NSRegularExpression *regex;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        regex = [NSRegularExpression regularExpressionWithPattern:@"^([A-Za-z]+)(\\d+),(\\d+)$"
+                                                          options:0
+                                                            error:nil];
+    });
+
+    NSTextCheckingResult *match = [regex firstMatchInString:productType
+                                                    options:0
+                                                      range:NSMakeRange(0, productType.length)];
+    if (!match || match.numberOfRanges != 4) {
+        return NULL;
     }
 
-    NSUInteger familyEnd = 0;
-    while (s[familyEnd] &&
-           ((s[familyEnd] >= 'A' && s[familyEnd] <= 'Z') ||
-            (s[familyEnd] >= 'a' && s[familyEnd] <= 'z'))) {
-        familyEnd++;
-    }
-    if (familyEnd == 0) {
-        return NO;
-    }
-
-    if (s[familyEnd] < '0' || s[familyEnd] > '9') {
-        return NO;
-    }
-    NSInteger major = 0;
-    NSUInteger pos = familyEnd;
-    while (s[pos] >= '0' && s[pos] <= '9') {
-        major = major * 10 + (s[pos] - '0');
-        pos++;
-    }
-    if (s[pos] != ',') {
-        return NO;
-    }
-    pos++;
-
-    if (s[pos] < '0' || s[pos] > '9') {
-        return NO;
-    }
-    NSInteger minor = 0;
-    while (s[pos] >= '0' && s[pos] <= '9') {
-        minor = minor * 10 + (s[pos] - '0');
-        pos++;
-    }
-    if (s[pos] != '\0') {
-        return NO;
-    }
-
-    if (familyEnd >= sizeof(version->familyName)) {
-        return NO;
-    }
-    strncpy(version->familyName, s, familyEnd);
-    version->familyName[familyEnd] = '\0';
-    version->major = major;
-    version->minor = minor;
-    return YES;
+    WatchFixProductVersion *version = [[WatchFixProductVersion alloc] init];
+    version.familyName = [productType substringWithRange:[match rangeAtIndex:1]];
+    version.major = [[productType substringWithRange:[match rangeAtIndex:2]] integerValue];
+    version.minor = [[productType substringWithRange:[match rangeAtIndex:3]] integerValue];
+    return version;
 }
 
-static WatchFixNRDeviceSize WatchFixLookupNanoRegistrySizeForParsedWatchVersion(const WatchFixProductVersion *version) {
-    if (!version || is_empty(version->familyName) || !is_equal(version->familyName, "Watch")) {
+static WatchFixNRDeviceSize WatchFixLookupNanoRegistrySizeForParsedWatchVersion(WatchFixProductVersion *version) {
+    if (!version || version.familyName.length == 0 || ![version.familyName isEqualToString:@"Watch"]) {
         return 0;
     }
 
-    switch (version->major) {
+    switch (version.major) {
         case 7:
-            switch (version->minor) {
+            switch (version.minor) {
                 case 1:
                 case 3:
                     return 5;
@@ -90,7 +63,7 @@ static WatchFixNRDeviceSize WatchFixLookupNanoRegistrySizeForParsedWatchVersion(
                     return 0;
             }
         case 6:
-            switch (version->minor) {
+            switch (version.minor) {
                 case 1:
                 case 3:
                 case 10:
@@ -117,7 +90,7 @@ static WatchFixNRDeviceSize WatchFixLookupNanoRegistrySizeForParsedWatchVersion(
                     return 0;
             }
         case 5:
-            switch (version->minor) {
+            switch (version.minor) {
                 case 9:
                 case 11:
                     return 4;
@@ -133,12 +106,11 @@ static WatchFixNRDeviceSize WatchFixLookupNanoRegistrySizeForParsedWatchVersion(
 }
 
 static WatchFixNRDeviceSize WatchFixNanoRegistryDeviceSizeForProductType(NSString *productType) {
-    WatchFixProductVersion version;
-    memset(&version, 0, sizeof(version));
-    if (!WatchFixParseProductVersion(productType, &version)) {
+    WatchFixProductVersion *version = WatchFixParseProductVersion(productType);
+    if (!version) {
         return 0;
     }
-    return WatchFixLookupNanoRegistrySizeForParsedWatchVersion(&version);
+    return WatchFixLookupNanoRegistrySizeForParsedWatchVersion(version);
 }
 
 static WatchFixPBBDeviceSize WatchFixPBBSizeForNRDeviceSize(WatchFixNRDeviceSize size) {
@@ -215,25 +187,25 @@ static NSString *WatchFixDisplayNameForSize(uint64_t size) {
     uint64_t normalizedSize = WatchFixNormalizeSizeAlias(size);
     switch (normalizedSize) {
         case 1:
-            return NSSTR("Regular");
+            return @"Regular";
         case 2:
-            return NSSTR("Compact");
+            return @"Compact";
         case 7:
-            return NSSTR("448h");
+            return @"448h";
         case 8:
-            return NSSTR("394h");
+            return @"394h";
         case 13:
-            return NSSTR("484h");
+            return @"484h";
         case 14:
-            return NSSTR("430h");
+            return @"430h";
         case 19:
-            return NSSTR("502h");
+            return @"502h";
         case 20:
-            return NSSTR("446h");
+            return @"446h";
         case 21:
-            return NSSTR("496h");
+            return @"496h";
         default:
-            return NSSTR("Generic");
+            return @"Generic";
     }
 }
 
@@ -310,8 +282,8 @@ static NSInteger WatchFixDefaultMaterialForSpecialSize(NSInteger size) {
     }
 }
 
-static BOOL WatchFixProductVersionIsNativelySupportedOnCurrentOS(const WatchFixProductVersion *version) {
-    if (!version || is_empty(version->familyName) || !is_equal(version->familyName, "Watch")) {
+static BOOL WatchFixProductVersionIsNativelySupportedOnCurrentOS(WatchFixProductVersion *version) {
+    if (!version || version.familyName.length == 0 || ![version.familyName isEqualToString:@"Watch"]) {
         return NO;
     }
 
@@ -346,51 +318,49 @@ static BOOL WatchFixProductVersionIsNativelySupportedOnCurrentOS(const WatchFixP
             return YES;
     }
 
-    if (version->major != ceilingMajor) {
-        return version->major < ceilingMajor;
+    if (version.major != ceilingMajor) {
+        return version.major < ceilingMajor;
     }
 
-    return version->minor <= ceilingMinor;
+    return version.minor <= ceilingMinor;
 }
 
 static NSString *WatchFixLocalizedVariantSizeForProductType(NSString *productType) {
-    WatchFixProductVersion version;
-    memset(&version, 0, sizeof(version));
-    if (!WatchFixParseProductVersion(productType, &version)) {
+    WatchFixProductVersion *version = WatchFixParseProductVersion(productType);
+    if (!version) {
         return nil;
     }
 
-    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(&version);
+    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(version);
     WatchFixPBBDeviceSize pbbSize = WatchFixPBBSizeForNRDeviceSize(nrSize);
     if (!pbbSize) {
         return nil;
     }
 
     NSString *displayName = WatchFixDisplayNameForSize(pbbSize);
-    NSString *key = [[displayName uppercaseString] stringByAppendingString:NSSTR("_VARIANT")];
+    NSString *key = [[displayName uppercaseString] stringByAppendingString:@"_VARIANT"];
     Class watchViewClass = objc_lookUpClass("BPSWatchView");
     NSBundle *bundle = watchViewClass ? [NSBundle bundleForClass:watchViewClass] : [NSBundle mainBundle];
     return [bundle localizedStringForKey:key value:nil table:nil];
 }
 
 static NSString *WatchFixShortLocalizedVariantSizeForProductType(NSString *productType) {
-    WatchFixProductVersion version;
-    memset(&version, 0, sizeof(version));
-    if (!WatchFixParseProductVersion(productType, &version)) {
+    WatchFixProductVersion *version = WatchFixParseProductVersion(productType);
+    if (!version) {
         return nil;
     }
 
-    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(&version);
-    WatchFixPBBDeviceSize pbbSize = WatchFixPBBSizeForNRDeviceSize(nrSize);
-    if (!pbbSize) {
+    WatchFixNRDeviceSize nrSize2 = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(version);
+    WatchFixPBBDeviceSize pbbSize2 = WatchFixPBBSizeForNRDeviceSize(nrSize2);
+    if (!pbbSize2) {
         return nil;
     }
 
-    NSString *displayName = WatchFixDisplayNameForSize(pbbSize);
-    NSString *key = [[displayName uppercaseString] stringByAppendingString:NSSTR("_VARIANT_SHORT")];
-    Class watchViewClass = objc_lookUpClass("BPSWatchView");
-    NSBundle *bundle = watchViewClass ? [NSBundle bundleForClass:watchViewClass] : [NSBundle mainBundle];
-    return [bundle localizedStringForKey:key value:nil table:nil];
+    NSString *displayName2 = WatchFixDisplayNameForSize(pbbSize2);
+    NSString *key2 = [[displayName2 uppercaseString] stringByAppendingString:@"_VARIANT_SHORT"];
+    Class watchViewClass2 = objc_lookUpClass("BPSWatchView");
+    NSBundle *bundle2 = watchViewClass2 ? [NSBundle bundleForClass:watchViewClass2] : [NSBundle mainBundle];
+    return [bundle2 localizedStringForKey:key2 value:nil table:nil];
 }
 
 static NSString *WatchFixBuildResourceString(NSString *prefix, NSInteger material, NSInteger size, NSUInteger attrs) {
@@ -411,16 +381,16 @@ static NSString *WatchFixBuildResourceString(NSString *prefix, NSInteger materia
             return nil;
         }
         material = mappedMaterial;
-        [parts addObject:[NSString stringWithFormat:NSSTR("%ld"), (long)mappedMaterial]];
-        [parts addObject:NSSTR("M")];
+        [parts addObject:[NSString stringWithFormat:@"%ld", (long)mappedMaterial]];
+        [parts addObject:@"M"];
     } else if ((attrs & 0x1) != 0) {
         NSInteger mappedMaterial = WatchFixEMaterialOverrideValue(material);
         if (!mappedMaterial) {
             return nil;
         }
         material = mappedMaterial;
-        [parts addObject:[NSString stringWithFormat:NSSTR("%ld"), (long)mappedMaterial]];
-        [parts addObject:NSSTR("E")];
+        [parts addObject:[NSString stringWithFormat:@"%ld", (long)mappedMaterial]];
+        [parts addObject:@"E"];
     }
 
     if ((attrs & 0x4) != 0) {
@@ -431,7 +401,7 @@ static NSString *WatchFixBuildResourceString(NSString *prefix, NSInteger materia
         [parts addObject:[[WatchFixDisplayNameForSize((uint64_t)normalizedSize) lowercaseString] copy]];
     }
 
-    return [parts componentsJoinedByString:NSSTR("-")];
+    return [parts componentsJoinedByString:@"-"];
 }
 
 static NSInteger WatchFixInternalSizeForNRSizeAndBehavior(NSInteger nrSize, NSInteger behavior) {
@@ -847,64 +817,11 @@ static void WatchFixPullDefaultMaterialAssetsForAllSpecialSizes() {
 }
 
 static NSString *WatchFixUnsupportedUpdateMessage(void) {
-    return NSSTR("A software update is available for your Apple Watch, but it is not compatible with the installed version of WatchFix Pairing Support\n\nCheck for an updated version of WatchFix (or update iOS instead), then try installing this update again");
+    return @"A software update is available for your Apple Watch, but it is not compatible with the installed version of WatchFix Pairing Support\n\nCheck for an updated version of WatchFix (or update iOS instead), then try installing this update again";
 }
 
 static NSString *WatchFixPairingNotPossibleMessage(void) {
-    return NSSTR("The currently installed version of WatchFix Pairing Support does not support the version of watchOS on this Apple Watch.\n\nUpdate iOS or WatchFix to pair this Apple Watch");
-}
-
-static void WatchFixPresentUnsupportedWatchUpdateAlert(UIViewController *controller) {
-    UIAlertController *alert =
-        [UIAlertController alertControllerWithTitle:NSSTR("Update Unsupported")
-                                            message:WatchFixUnsupportedUpdateMessage()
-                                     preferredStyle:UIAlertControllerStyleAlert];
-
-    NSString *cancelTitle =
-        [[NSBundle mainBundle] localizedStringForKey:NSSTR("CANCEL")
-                                               value:NSSTR("")
-                                               table:nil];
-
-    UIAlertAction *cancelAction =
-        [UIAlertAction actionWithTitle:cancelTitle
-                                 style:UIAlertActionStyleCancel
-                               handler:^(__unused UIAlertAction *action) {
-        [controller dismissViewControllerAnimated:YES completion:nil];
-        [[controller navigationController] popViewControllerAnimated:YES];
-    }];
-
-    [alert addAction:cancelAction];
-    [controller presentViewController:alert animated:YES completion:nil];
-}
-
-static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
-                                                   void (^dismissalHandler)(void)) {
-    UIAlertController *alert =
-        [UIAlertController alertControllerWithTitle:NSSTR("Pairing Not Possible")
-                                            message:WatchFixPairingNotPossibleMessage()
-                                     preferredStyle:UIAlertControllerStyleAlert];
-
-    NSString *cancelTitle =
-        [[NSBundle mainBundle] localizedStringForKey:NSSTR("CANCEL_PAIRING")
-                                               value:NSSTR("")
-                                               table:nil];
-
-    UIAlertAction *cancelAction =
-        [UIAlertAction actionWithTitle:cancelTitle
-                                 style:UIAlertActionStyleCancel
-                               handler:^(__unused UIAlertAction *action) {
-        if (dismissalHandler) {
-            dismissalHandler();
-        }
-    }];
-
-    [alert addAction:cancelAction];
-
-    UIViewController *presenter = [[controller navigationController] topViewController];
-    if (!presenter) {
-        presenter = controller;
-    }
-    [presenter presentViewController:alert animated:YES completion:nil];
+    return @"The currently installed version of WatchFix Pairing Support does not support the version of watchOS on this Apple Watch.\n\nUpdate iOS or WatchFix to pair this Apple Watch";
 }
 
 %group WatchAppSupportSoftwareUpdateControllerHooks
@@ -917,7 +834,26 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
         return;
     }
 
-    WatchFixPresentUnsupportedWatchUpdateAlert((UIViewController *)self);
+    UIAlertController *alert =
+    [UIAlertController alertControllerWithTitle:@"Update Unsupported"
+                                        message:WatchFixUnsupportedUpdateMessage()
+                                    preferredStyle:UIAlertControllerStyleAlert];
+
+    NSString *cancelTitle =
+        [[NSBundle mainBundle] localizedStringForKey:@"CANCEL"
+                                               value:@""
+                                               table:nil];
+
+    UIAlertAction *cancelAction =
+        [UIAlertAction actionWithTitle:cancelTitle
+                                 style:UIAlertActionStyleCancel
+                               handler:^(__unused UIAlertAction *action) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+        [[self navigationController] popViewControllerAnimated:YES];
+    }];
+
+    [alert addAction:cancelAction];
+    [self presentViewController:alert animated:YES completion:nil];
 }
 
 %end
@@ -959,7 +895,32 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
 %hook WFSetupControllerClass
 
 - (void)displayCompanionTooOldPairingFailureAlertWithDismissalHandler:(void (^)(void))dismissalHandler {
-    WatchFixPresentPairingNotPossibleAlert((UIViewController *)self, dismissalHandler);
+    UIAlertController *alert =
+    [UIAlertController alertControllerWithTitle:@"Pairing Not Possible"
+                                        message:WatchFixPairingNotPossibleMessage()
+                                    preferredStyle:UIAlertControllerStyleAlert];
+
+    NSString *cancelTitle =
+        [[NSBundle mainBundle] localizedStringForKey:@"CANCEL_PAIRING"
+                                               value:@""
+                                               table:nil];
+
+    UIAlertAction *cancelAction =
+        [UIAlertAction actionWithTitle:cancelTitle
+                                 style:UIAlertActionStyleCancel
+                               handler:^(__unused UIAlertAction *action) {
+        if (dismissalHandler) {
+            dismissalHandler();
+        }
+    }];
+
+    [alert addAction:cancelAction];
+
+    UIViewController *presenter = [[self navigationController] topViewController];
+    if (!presenter) {
+        presenter = self;
+    }
+    [presenter presentViewController:alert animated:YES completion:nil];
 }
 
 %end
@@ -975,7 +936,7 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
         NSString *advertisingName = nil;
         id userInfo = [(WatchFixSetupContext *)context userInfo];
         if ([userInfo isKindOfClass:[NSDictionary class]]) {
-            id candidate = [(NSDictionary *)userInfo objectForKey:NSSTR("advertisingName")];
+            id candidate = [(NSDictionary *)userInfo objectForKey:@"advertisingName"];
             if ([candidate isKindOfClass:[NSString class]]) {
                 advertisingName = candidate;
             }
@@ -1037,7 +998,7 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
         return;
     }
 
-    if ([name rangeOfString:NSSTR("/")].location != NSNotFound) {
+    if ([name rangeOfString:@"/"].location != NSNotFound) {
         Log("WatchAppSupport setFallbackImageName: path-like name, passing through: %s", CStringOrPlaceholder(name));
         %orig(name);
         return;
@@ -1230,14 +1191,15 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
         return %orig(device);
     }
 
-    WatchFixProductVersion version;
-    memset(&version, 0, sizeof(version));
-    if (!WatchFixParseProductVersion(productType, &version) ||
-        WatchFixProductVersionIsNativelySupportedOnCurrentOS(&version)) {
+    WatchFixProductVersion *version = WatchFixParseProductVersion(productType);
+    if (!version) {
+        return %orig(device);
+    }
+    if (WatchFixProductVersionIsNativelySupportedOnCurrentOS(version)) {
         return %orig(device);
     }
 
-    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(&version);
+    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(version);
     return (NSInteger)WatchFixPBBSizeForNRDeviceSize(nrSize);
 }
 
@@ -1279,13 +1241,12 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
         return;
     }
 
-    WatchFixProductVersion version;
-    memset(&version, 0, sizeof(version));
-    if (!WatchFixParseProductVersion(productType, &version)) {
+    WatchFixProductVersion *version = WatchFixParseProductVersion(productType);
+    if (!version) {
         return;
     }
 
-    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(&version);
+    WatchFixNRDeviceSize nrSize = WatchFixLookupNanoRegistrySizeForParsedWatchVersion(version);
     NSInteger internalSize =
         WatchFixInternalSizeForNRSizeAndBehavior(nrSize,
                                                  [(WatchFixPBBridgeWatchAttributeController *)self hardwareBehavior]);
@@ -1363,80 +1324,76 @@ static void WatchFixPresentPairingNotPossibleAlert(UIViewController *controller,
 %end
 
 void InitWatchAppSupportHooks(void) {
-    static BOOL initialized = NO;
-    if (initialized) {
-        Log("WatchAppSupport hooks already initialized");
-        return;
-    }
-    initialized = YES;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        Log("Initializing WatchAppSupport hooks...");
 
-    Log("Initializing WatchAppSupport hooks...");
+        Class softwareUpdateControllerClass = objc_lookUpClass("COSSoftwareUpdateController");
+        if (softwareUpdateControllerClass) {
+            %init(WatchAppSupportSoftwareUpdateControllerHooks, WFSoftwareUpdateControllerClass=softwareUpdateControllerClass);
+        }
 
-    Class softwareUpdateControllerClass = objc_lookUpClass("COSSoftwareUpdateController");
-    if (softwareUpdateControllerClass) {
-        %init(WatchAppSupportSoftwareUpdateControllerHooks, WFSoftwareUpdateControllerClass=softwareUpdateControllerClass);
-    }
+        Class softwareUpdateTableViewClass = objc_lookUpClass("COSSoftwareUpdateTableView");
+        if (softwareUpdateTableViewClass) {
+            %init(WatchAppSupportSoftwareUpdateTableHooks, WFSoftwareUpdateTableViewClass=softwareUpdateTableViewClass);
+        }
 
-    Class softwareUpdateTableViewClass = objc_lookUpClass("COSSoftwareUpdateTableView");
-    if (softwareUpdateTableViewClass) {
-        %init(WatchAppSupportSoftwareUpdateTableHooks, WFSoftwareUpdateTableViewClass=softwareUpdateTableViewClass);
-    }
+        Class setupControllerClass = objc_lookUpClass("COSSetupController");
+        if (setupControllerClass) {
+            %init(WatchAppSupportSetupControllerHooks, WFSetupControllerClass=setupControllerClass);
+        }
 
-    Class setupControllerClass = objc_lookUpClass("COSSetupController");
-    if (setupControllerClass) {
-        %init(WatchAppSupportSetupControllerHooks, WFSetupControllerClass=setupControllerClass);
-    }
+        Class setupProxyClass = objc_lookUpClass("WatchSetupViewControllerProxy");
+        if (setupProxyClass) {
+            %init(WatchAppSupportSetupProxyHooks, WFSetupProxyClass=setupProxyClass);
+        }
 
-    Class setupProxyClass = objc_lookUpClass("WatchSetupViewControllerProxy");
-    if (setupProxyClass) {
-        %init(WatchAppSupportSetupProxyHooks, WFSetupProxyClass=setupProxyClass);
-    }
+        Class setupDeviceSyncViewClass = objc_lookUpClass("COSSetupDeviceSyncView");
+        if (setupDeviceSyncViewClass) {
+            %init(WatchAppSupportSetupDeviceSyncHooks, WFSetupDeviceSyncViewClass=setupDeviceSyncViewClass);
+        }
 
-    Class setupDeviceSyncViewClass = objc_lookUpClass("COSSetupDeviceSyncView");
-    if (setupDeviceSyncViewClass) {
-        %init(WatchAppSupportSetupDeviceSyncHooks, WFSetupDeviceSyncViewClass=setupDeviceSyncViewClass);
-    }
+        Class remoteImageViewClass = objc_lookUpClass("BPSRemoteImageView");
+        if (remoteImageViewClass) {
+            %init(WatchAppSupportRemoteImageHooks, WFBPSRemoteImageViewClass=remoteImageViewClass);
+        }
 
-    Class remoteImageViewClass = objc_lookUpClass("BPSRemoteImageView");
-    if (remoteImageViewClass) {
-        %init(WatchAppSupportRemoteImageHooks, WFBPSRemoteImageViewClass=remoteImageViewClass);
-    }
+        Class watchViewClass = objc_lookUpClass("BPSWatchView");
+        if (watchViewClass) {
+            %init(WatchAppSupportWatchViewHooks, WFBPSWatchViewClass=watchViewClass);
+        }
 
-    Class watchViewClass = objc_lookUpClass("BPSWatchView");
-    if (watchViewClass) {
-        %init(WatchAppSupportWatchViewHooks, WFBPSWatchViewClass=watchViewClass);
-    }
+        Class progressViewClass = objc_lookUpClass("PBBridgeProgressView");
+        if (progressViewClass) {
+            %init(WatchAppSupportProgressViewHooks, WFPBBridgeProgressViewClass=progressViewClass);
+        }
 
-    Class progressViewClass = objc_lookUpClass("PBBridgeProgressView");
-    if (progressViewClass) {
-        %init(WatchAppSupportProgressViewHooks, WFPBBridgeProgressViewClass=progressViewClass);
-    }
+        Class attributeControllerClass = objc_lookUpClass("PBBridgeWatchAttributeController");
+        if (attributeControllerClass) {
+            %init(WatchAppSupportAttributeControllerHooks,
+                WFPBBridgeWatchAttributeControllerClass=attributeControllerClass);
+        }
 
-    Class attributeControllerClass = objc_lookUpClass("PBBridgeWatchAttributeController");
-    if (attributeControllerClass) {
-        %init(WatchAppSupportAttributeControllerHooks,
-              WFPBBridgeWatchAttributeControllerClass=attributeControllerClass);
-    }
+        if (isOSVersionAtLeast(16, 0, 0) && attributeControllerClass) {
+            %init(WatchAppSupportAttributeControllerFallbackHooks,
+                WFPBBridgeWatchAttributeControllerFallbackClass=attributeControllerClass);
+        }
 
-    if (isOSVersionAtLeast(16, 0, 0) && attributeControllerClass) {
-        %init(WatchAppSupportAttributeControllerFallbackHooks,
-              WFPBBridgeWatchAttributeControllerFallbackClass=attributeControllerClass);
-    }
+        Class assetsManagerClass = objc_lookUpClass("PBBridgeAssetsManager");
+        if (!isOSVersionAtLeast(18, 0, 0) && assetsManagerClass) {
+            %init(WatchAppSupportAssetsManagerHooks, WFPBBridgeAssetsManagerClass=assetsManagerClass);
+        }
 
-    Class assetsManagerClass = objc_lookUpClass("PBBridgeAssetsManager");
-    if (!isOSVersionAtLeast(18, 0, 0) && assetsManagerClass) {
-        %init(WatchAppSupportAssetsManagerHooks, WFPBBridgeAssetsManagerClass=assetsManagerClass);
-    }
+        Log("WatchAppSupport hooks initialized");
 
-    Log("WatchAppSupport hooks initialized");
+        %init(WatchAppSupportFunctionHooks);
 
-    %init(WatchAppSupportFunctionHooks);
-
-    Log("WatchAppSupport function hooks initialized");
-    const char *programName = getprogname();
-    if (!programName || !is_equal(programName, "SharingViewService")) {
-        WatchFixPullDefaultMaterialAssetsForAllSpecialSizes();
-    }
+        Log("WatchAppSupport function hooks initialized");
+        const char *programName = getprogname();
+        if (!programName || !is_equal(programName, "SharingViewService")) {
+            WatchFixPullDefaultMaterialAssetsForAllSpecialSizes();
+        }
+    });
 }
 
 %ctor {
