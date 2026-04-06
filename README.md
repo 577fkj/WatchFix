@@ -10,16 +10,16 @@ The stability still needs to be tested
 
 - Fix Pairing
 - System Update
-- Cellular Fix
-- Lockdown Mode
+- Cellular Support
+- Lockdown Mode Support
 - Watch Face Support
 - Layout Support
-- Photo Sync
-- Media Sync
+- Photo Sync Support
+- Media Sync Support
+- Maps Support
 
 ## Unimplemented feature
 
-- Maps Fix
 - Health Support
 - Ping My Watch
 
