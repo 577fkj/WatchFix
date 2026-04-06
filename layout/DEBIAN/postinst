@@ -8,6 +8,7 @@ GUI_SERVICES=(
     "com.apple.nanoregistryd"
     "com.apple.CommCenter"
     "com.apple.nanotimekitcompaniond"
+    "com.apple.nptocompaniond"
 )
 
 SYS_SERVICES=(

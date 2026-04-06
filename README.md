@@ -5,7 +5,6 @@ The stability still needs to be tested
 ## Fix feature
 
 - Fix Message auto uninstall
-- Fix Wallet card management (Maybe)
 
 ### No test
 
@@ -15,11 +14,11 @@ The stability still needs to be tested
 - Lockdown Mode
 - Watch Face Support
 - Layout Support
+- Photo Sync
 
 ## Unimplemented feature
 
 - Media Sync
-- Photo Sync
 - Maps Fix
 - Health Support
 - Ping My Watch
