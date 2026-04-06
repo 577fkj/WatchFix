@@ -1,0 +1,11 @@
+{
+    Filter = {
+        Bundles = (
+            "com.apple.Bridge",
+            "com.apple.NTKFaceSnapshotService"
+        );
+        Executables = (
+            "nanotimekitcompaniond"
+        );
+    };
+}

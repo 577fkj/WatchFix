@@ -6,14 +6,17 @@ The stability still needs to be tested
 
 - Fix Message auto uninstall
 - Fix Wallet card management (Maybe)
-- Fix Pairing (No test)
-- System Update (No test)
-- Cellular Fix (No test)
-- Lockdown Mode (No test)
+
+### No test
+
+- Fix Pairing
+- System Update
+- Cellular Fix
+- Lockdown Mode
+- Watch Face Support
 
 ## Unimplemented feature
 
-- Watch Face Support
 - Layout Support
 - Media Sync
 - Photo Sync
