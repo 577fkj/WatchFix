@@ -16,6 +16,8 @@ SYS_SERVICES=(
     "installd"
     "SharingViewService"
     "Bridge"
+    "Preferences"
+    "SpringBoard"
 )
 
 echo "WatchFix: Terminating processes..."

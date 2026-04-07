@@ -6,12 +6,18 @@ GUI_SERVICES=(
     "com.apple.MobileInstallationHelperService"
     "com.apple.identityservicesd"
     "com.apple.nanoregistryd"
+    "com.apple.CommCenter"
+    "com.apple.nanotimekitcompaniond"
+    "com.apple.nptocompaniond"
+    "com.apple.nanomapscd"
 )
 
 SYS_SERVICES=(
     "installd"
     "SharingViewService"
     "Bridge"
+    "Preferences"
+    "SpringBoard"
 )
 
 echo "WatchFix: Terminating processes..."
