@@ -27,6 +27,11 @@ The stability still needs to be tested
 
 The other functions of the plugin are still not perfect at present. I am not familiar with iOS development, and I don't know how to deal with many problems. If anyone is willing to help with development, please contact me, and I can provide relevant materials.
 
+## Sponsor
+
+- [Patreon](https://patreon.com/577FKJ)
+- [爱发电](https://afdian.tv/a/577fkj)
+
 ## Build
 
 ### Requirements
