@@ -1,0 +1,4 @@
+"WFPMWAlertTitle" = "呼叫我的 Apple Watch";
+"WFPMWAlertDismiss" = "好的";
+"WFPMWAlertMessageUnreachable" = "无法连接到 Apple Watch。";
+"WFPMWAlertMessageNotSupported" = "你的 Apple Watch 不支持「呼叫我的手表」。";

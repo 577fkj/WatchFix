@@ -1,0 +1,4 @@
+"WFPMWAlertTitle" = "Ping My Watch";
+"WFPMWAlertDismiss" = "OK";
+"WFPMWAlertMessageUnreachable" = "Apple Watch is unreachable.";
+"WFPMWAlertMessageNotSupported" = "Your Apple Watch does not support Ping My Watch.";

@@ -5,6 +5,7 @@ The stability still needs to be tested
 ## Fix feature
 
 - Fix Message auto uninstall
+- Ping My Watch
 
 ### No test
 
@@ -21,7 +22,6 @@ The stability still needs to be tested
 ## Unimplemented feature
 
 - Health Support
-- Ping My Watch
 
 ## Tips
 

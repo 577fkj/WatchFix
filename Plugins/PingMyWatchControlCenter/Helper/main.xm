@@ -80,16 +80,16 @@ int main(__unused int argc, __unused char *argv[]) {
         }
 
         BOOL didPlay = NO;
-        if ([connection respondsToSelector:@selector(playSoundAndLightsOnCompanionWithCompletion:)]) {
-            didPlay = WFPMWHelperInvokePingSelector(connection,
-                                                    @selector(playSoundAndLightsOnCompanionWithCompletion:),
-                                                    kWFPMWHelperPrimaryTimeoutSeconds);
-        }
-
-        if (!didPlay && [connection respondsToSelector:@selector(playSoundOnCompanionWithCompletion:)]) {
+        if ([connection respondsToSelector:@selector(playSoundOnCompanionWithCompletion:)]) {
             didPlay = WFPMWHelperInvokePingSelector(connection,
                                                     @selector(playSoundOnCompanionWithCompletion:),
                                                     kWFPMWHelperFallbackTimeoutSeconds);
+        }
+
+        if (!didPlay && [connection respondsToSelector:@selector(playSoundAndLightsOnCompanionWithCompletion:)]) {
+            didPlay = WFPMWHelperInvokePingSelector(connection,
+                                                    @selector(playSoundAndLightsOnCompanionWithCompletion:),
+                                                    kWFPMWHelperPrimaryTimeoutSeconds);
         }
 
         Log("helper finished ping request with result: %s", didPlay ? "YES" : "NO");

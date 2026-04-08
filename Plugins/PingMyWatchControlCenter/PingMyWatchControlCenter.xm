@@ -155,6 +155,41 @@ static pid_t WFPMWLaunchPingHelper(void) {
     return pid;
 }
 
+typedef NS_ENUM(NSInteger, WFPMWPingResult) {
+    WFPMWPingResultSuccess,
+    WFPMWPingResultUnreachable,
+    WFPMWPingResultNotSupported,
+};
+
+static NSString *WFPMWLocalizedString(NSString *key) {
+    NSBundle *bundle = [NSBundle bundleForClass:[WFPingMyWatchControlCenterModule class]];
+    return [bundle localizedStringForKey:key value:key table:nil];
+}
+
+static void WFPMWShowAlert(NSString *message) {
+    UIAlertController *alert =
+        [UIAlertController alertControllerWithTitle:WFPMWLocalizedString(@"WFPMWAlertTitle")
+                                            message:message
+                                     preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:WFPMWLocalizedString(@"WFPMWAlertDismiss")
+                                             style:UIAlertActionStyleDefault
+                                           handler:nil]];
+    UIWindow *keyWindow = nil;
+    for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+        if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+            keyWindow = [(UIWindowScene *)scene keyWindow];
+            break;
+        }
+    }
+    UIViewController *rootVC = keyWindow.rootViewController;
+    while (rootVC.presentedViewController) {
+        rootVC = rootVC.presentedViewController;
+    }
+    if (rootVC) {
+        [rootVC presentViewController:alert animated:YES completion:nil];
+    }
+}
+
 @implementation WFPingMyWatchControlCenterModule
 
 @synthesize pingInProgress = _pingInProgress;
@@ -218,11 +253,11 @@ static pid_t WFPMWLaunchPingHelper(void) {
     __weak __typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
         @autoreleasepool {
-            NRDevice *selectedWatch = WFPMWActivePairedWatch();
-            if (!selectedWatch) {
-                Log("no active paired watch matched the current selection criteria");
-            } else if (![selectedWatch supportsCapability:WFPMWCapabilityUUID()]) {
+            WFPMWPingResult pingResult = WFPMWPingResultUnreachable;
+
+            if (![WFPingMyWatchControlCenterModule isSupported]) {
                 Log("ping my watch is not supported for the active device");
+                pingResult = WFPMWPingResultNotSupported;
             } else {
                 pid_t helperPID = WFPMWLaunchPingHelper();
                 if (helperPID > 0) {
@@ -230,6 +265,8 @@ static pid_t WFPMWLaunchPingHelper(void) {
                     int waitResult = waitpid(helperPID, &waitStatus, 0);
                     if (waitResult == helperPID) {
                         Log("helper pid %d finished with wait status %d", helperPID, waitStatus);
+                        BOOL exitedOK = WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0;
+                        pingResult = exitedOK ? WFPMWPingResultSuccess : WFPMWPingResultUnreachable;
                     } else {
                         Log("waitpid failed for helper pid %d, result=%d errno=%d", helperPID, waitResult, errno);
                     }
@@ -242,8 +279,25 @@ static pid_t WFPMWLaunchPingHelper(void) {
                     return;
                 }
 
-                strongSelf.pingInProgress = NO;
-                WFPMWRefreshModuleState(strongSelf, YES);
+                if (pingResult == WFPMWPingResultSuccess) {
+                    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)),
+                                   dispatch_get_main_queue(), ^{
+                        __strong __typeof(weakSelf) innerSelf = weakSelf;
+                        if (!innerSelf) {
+                            return;
+                        }
+                        innerSelf.pingInProgress = NO;
+                        WFPMWRefreshModuleState(innerSelf, YES);
+                    });
+                } else {
+                    strongSelf.pingInProgress = NO;
+                    WFPMWRefreshModuleState(strongSelf, YES);
+
+                    NSString *message = (pingResult == WFPMWPingResultNotSupported)
+                        ? WFPMWLocalizedString(@"WFPMWAlertMessageNotSupported")
+                        : WFPMWLocalizedString(@"WFPMWAlertMessageUnreachable");
+                    WFPMWShowAlert(message);
+                }
             });
         }
     });
