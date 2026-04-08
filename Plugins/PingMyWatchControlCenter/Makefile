@@ -6,7 +6,7 @@ TOOL_NAME = WatchFixPingMyWatchHelper
 $(BUNDLE_NAME)_FILES = PingMyWatchControlCenter.xm $(WATCHFIX_UTILS_FILES)
 $(BUNDLE_NAME)_CFLAGS = -fobjc-arc $(WATCHFIX_UTILS_CFLAGS)
 $(BUNDLE_NAME)_BUNDLE_EXTENSION = bundle
-$(BUNDLE_NAME)_INSTALL_PATH = /Library/ControlCenter/Bundles/
+$(BUNDLE_NAME)_INSTALL_PATH = /Library/ControlCenter/Bundles
 $(BUNDLE_NAME)_PRIVATE_FRAMEWORKS = ControlCenterUIKit NanoRegistry
 $(BUNDLE_NAME)_RESOURCE_DIRS = Resources
 
