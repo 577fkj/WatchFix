@@ -529,7 +529,7 @@ incomingUnhandledProtobuf:(IDSProtobuf *)protobuf
         return nil;
     }
 
-    if ([NSProcessInfo processInfo].operatingSystemVersion.majorVersion <= 14 &&
+    if (IOSMajorVersion() <= 14 &&
         [object respondsToSelector:@selector(addIncomingFileHandler:forMessageID:)]) {
         [object addIncomingFileHandler:@"wf_pls_handleJupiterInboundFile:"
                           forMessageID:kWFJupiterInboundMessageID];
@@ -703,17 +703,15 @@ incomingResourceAtURL:(NSURL *)incomingURL
         return;
     }
 
-    NSInteger hostOSMajorVersion = [NSProcessInfo processInfo].operatingSystemVersion.majorVersion;
-    Log(@"initializing PhotoLibrarySupport for host major %ld", (long)hostOSMajorVersion);
-
-    if (hostOSMajorVersion >= 17) {
+    if (IOSVersionAtLeast(17, 0, 0)) {
         Log(@"host major version >= 17, skipping PhotoLibrarySupport hooks");
         return;
     }
 
     %init(PhotoLibrarySupportCommon);
 
-    if (hostOSMajorVersion >= 16) {
+    if (IOSVersionAtLeast(16, 0, 0)) {
+        Log(@"host major version >= 16, skipping PhotoLibrarySupportLegacySync hooks");
         return;
     }
 

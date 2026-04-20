@@ -237,29 +237,46 @@ bool is_empty(const char *str) {
     return !str || str[0] == '\0';
 }
 
-static void ParseSysctlIOSVersion(NSInteger *outMajor, NSInteger *outMinor, NSInteger *outPatch) {
-    char buf[32] = {0};
-    size_t len = sizeof(buf);
-    if (sysctlbyname("kern.osproductversion", buf, &len, NULL, 0) != 0) {
-        if (outMajor) { *outMajor = 0; }
-        if (outMinor) { *outMinor = 0; }
-        if (outPatch) { *outPatch = 0; }
-        return;
-    }
-    NSInteger major = 0, minor = 0, patch = 0;
-    sscanf(buf, "%ld.%ld.%ld", &major, &minor, &patch);
-    if (outMajor) { *outMajor = major; }
-    if (outMinor) { *outMinor = minor; }
-    if (outPatch) { *outPatch = patch; }
+
+static NSInteger cachedMajor = -1, cachedMinor = -1, cachedPatch = -1;
+static void ParseSysctlIOSVersion() {
+    static dispatch_once_t token;
+    dispatch_once(&token, ^{
+        char buf[32] = {0};
+        size_t len = sizeof(buf);
+        if (sysctlbyname("kern.osproductversion", buf, &len, NULL, 0) != 0) {
+            Log(@"sysctlbyname failed: %s", strerror(errno));
+            cachedMajor = 0;
+            cachedMinor = 0;
+            cachedPatch = 0;
+            return;
+        }
+        NSInteger major = 0, minor = 0, patch = 0;
+        sscanf(buf, "%ld.%ld.%ld", &major, &minor, &patch);
+        cachedMajor = major;
+        cachedMinor = minor;
+        cachedPatch = patch;
+    });
 }
 
 BOOL IOSVersionAtLeast(NSInteger major, NSInteger minor, NSInteger patch) {
-    static NSInteger cachedMajor = -1, cachedMinor = -1, cachedPatch = -1;
-    static dispatch_once_t token;
-    dispatch_once(&token, ^{
-        ParseSysctlIOSVersion(&cachedMajor, &cachedMinor, &cachedPatch);
-    });
+    ParseSysctlIOSVersion();
     if (cachedMajor != major) { return cachedMajor > major; }
     if (cachedMinor != minor) { return cachedMinor > minor; }
     return cachedPatch >= patch;
+}
+
+NSInteger IOSMajorVersion(void) {
+    ParseSysctlIOSVersion();
+    return cachedMajor;
+}
+
+NSInteger IOSMinorVersion(void) {
+    ParseSysctlIOSVersion();
+    return cachedMinor;
+}
+
+NSInteger IOSPatchVersion(void) {
+    ParseSysctlIOSVersion();
+    return cachedPatch;
 }

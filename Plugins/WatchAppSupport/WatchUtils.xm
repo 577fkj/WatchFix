@@ -3,6 +3,7 @@
 #import <objc/runtime.h>
 #import "WatchUtils_internal.h"
 #import "WatchDeviceDatabase.h"
+#import "utils.h"
 
 // ---------------------------------------------------------------------------
 // Shared re-entrancy guard
@@ -118,7 +119,7 @@ BOOL WatchFixProductVersionIsNativelySupportedOnCurrentOS(WatchFixProductVersion
 
     NSInteger ceilingMajor = 0;
     NSInteger ceilingMinor = 0;
-    switch ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion) {
+    switch (IOSMajorVersion()) {
         case 18: ceilingMajor = 7; ceilingMinor = 11; break;
         case 17: ceilingMajor = 7; ceilingMinor = 5;  break;
         case 16: ceilingMajor = 6; ceilingMinor = 18; break;
@@ -231,7 +232,7 @@ NSInteger WatchFixInternalSizeForNRSizeAndBehavior(NSInteger nrSize, NSInteger b
 // ---------------------------------------------------------------------------
 NSArray *WatchFixSpecialSizesForCurrentOS(void) {
     NSMutableArray *sizes = [NSMutableArray array];
-    NSInteger osMajor = [[NSProcessInfo processInfo] operatingSystemVersion].majorVersion;
+    NSInteger osMajor = IOSMajorVersion();
     switch (osMajor) {
         case 17:
         case 16:

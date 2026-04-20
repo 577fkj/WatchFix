@@ -12,3 +12,6 @@ bool is_empty(const char *str);
 // Real iOS version check via sysctl — bypasses any NSProcessInfo hook.
 // Returns YES if the actual running iOS version is >= major.minor.patch.
 BOOL IOSVersionAtLeast(NSInteger major, NSInteger minor, NSInteger patch);
+NSInteger IOSMajorVersion();
+NSInteger IOSMinorVersion();
+NSInteger IOSPatchVersion();

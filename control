@@ -1,6 +1,6 @@
 Package: cn.fkj233.watchfix
 Name: WatchFix
-Version: 2.0.0
+Version: 2.0.1
 Architecture: iphoneos-arm64
 Description: Fix Apple watch connection issues
 Maintainer: 577FKJ
