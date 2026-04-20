@@ -1,4 +1,6 @@
+"plugin.PingMyWatchControlCenter.title" = "Ping My Watch";
+"plugin.PingMyWatchControlCenter.detail" = "新增呼叫 Apple Watch 的控制中心模組。";
 "WFPMWAlertTitle" = "呼叫我的 Apple Watch";
 "WFPMWAlertDismiss" = "好的";
-"WFPMWAlertMessageUnreachable" = "無法連線至 Apple Watch。";
+"WFPMWAlertMessageUnreachable" = "無法連線到 Apple Watch。";
 "WFPMWAlertMessageNotSupported" = "你的 Apple Watch 不支援「呼叫我的手錶」。";

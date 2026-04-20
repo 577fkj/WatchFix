@@ -56,25 +56,25 @@ static BOOL WatchFixServiceDictionariesContainLockdownModeEntry(NSArray *service
 - (NSArray *)loadServiceDictionaries {
     NSArray *serviceDictionaries = %orig;
     if (serviceDictionaries && ![serviceDictionaries isKindOfClass:[NSArray class]]) {
-        Log("loadServiceDictionaries returned unexpected class: %s",
-            class_getName(object_getClass(serviceDictionaries)));
+        Log(@"loadServiceDictionaries returned unexpected class: %@",
+              StringFromCString(class_getName(object_getClass(serviceDictionaries))));
         return serviceDictionaries;
     }
 
     if (WatchFixServiceDictionariesContainLockdownModeEntry(serviceDictionaries)) {
-        Log("lockdown mode service dictionary already present");
+        Log(@"lockdown mode service dictionary already present");
         return serviceDictionaries;
     }
 
     NSMutableArray *mutableServiceDictionaries =
         serviceDictionaries ? [serviceDictionaries mutableCopy] : [NSMutableArray array];
     if (!mutableServiceDictionaries) {
-        Log("failed to create mutable service dictionary array");
+        Log(@"failed to create mutable service dictionary array");
         return serviceDictionaries;
     }
 
     [mutableServiceDictionaries addObject:WatchFixLockdownModeServiceDictionary()];
-    Log("added lockdown mode service dictionary");
+    Log(@"added lockdown mode service dictionary");
     return mutableServiceDictionaries;
 }
 
@@ -83,8 +83,8 @@ static BOOL WatchFixServiceDictionariesContainLockdownModeEntry(NSArray *service
 %end
 
 static void InitLockdownModeSupportHooks(void) {
-    if (isOSVersionAtLeast(17, 0, 0)) {
-        Log("host OS is iOS 17 or newer, skipping LockdownModeSupport hooks");
+    if (IOSVersionAtLeast(17, 0, 0)) {
+        Log(@"host OS is iOS 17 or newer, skipping LockdownModeSupport hooks");
         return;
     }
 
@@ -92,12 +92,12 @@ static void InitLockdownModeSupportHooks(void) {
     dispatch_once(&onceToken, ^{
         Class providerClass = objc_lookUpClass("IDSDependencyProvider");
         if (!providerClass) {
-            Log("IDSDependencyProvider class not found, skipping LockdownModeSupport hooks");
+            Log(@"IDSDependencyProvider class not found, skipping LockdownModeSupport hooks");
             return;
         }
 
         %init(LockdownModeSupport, IDSDependencyProvider=providerClass);
-        Log("installed LockdownModeSupport hooks");
+        Log(@"installed LockdownModeSupport hooks");
     });
 }
 
@@ -108,8 +108,8 @@ static void InitLockdownModeSupportHooks(void) {
     }
 
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    Log("Bundle ID   : %s", CStringOrPlaceholder(bundleID));
-    Log("Program Name: %s", progname);
+    Log(@"Bundle ID   : %@", bundleID);
+    Log(@"Program Name: %@", StringFromCString(progname));
 
     if (is_equal(progname, "identityservicesd")) {
         InitLockdownModeSupportHooks();

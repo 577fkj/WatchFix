@@ -5,31 +5,31 @@
 
 static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
     if (![client isActive]) {
-        Log("client is not active");
+        Log(@"client is not active");
         return NO;
     }
 
-    Log("client is active, checking interfaces");
+    Log(@"client is active, checking interfaces");
     if ([client isConnectedOnInterface:0] && ![client needsToDisconnectOnInterface:0]) {
-        Log("client is connected on interface 0");
+        Log(@"client is connected on interface 0");
         return YES;
     }
-    Log("client is not connected on interface 0");
-    Log("isConnectedOnInterface:0=%s needsToDisconnectOnInterface:0=%s",
-           [client isConnectedOnInterface:0] ? "YES" : "NO",
-           [client needsToDisconnectOnInterface:0] ? "YES" : "NO");
+    Log(@"client is not connected on interface 0");
+    Log(@"isConnectedOnInterface:0=%@ needsToDisconnectOnInterface:0=%@",
+          BoolString([client isConnectedOnInterface:0]),
+          BoolString([client needsToDisconnectOnInterface:0]));
 
-    Log("checking interface 1 for fallback");
+    Log(@"checking interface 1 for fallback");
     if ([client isConnectedOnInterface:1] && ![client needsToDisconnectOnInterface:1]) {
-        Log("client is connected on interface 1");
+        Log(@"client is connected on interface 1");
         return YES;
     }
-    Log("client is not connected on interface 1");
-    Log("isConnectedOnInterface:1=%s needsToDisconnectOnInterface:1=%s",
-           [client isConnectedOnInterface:1] ? "YES" : "NO",
-           [client needsToDisconnectOnInterface:1] ? "YES" : "NO");
+    Log(@"client is not connected on interface 1");
+    Log(@"isConnectedOnInterface:1=%@ needsToDisconnectOnInterface:1=%@",
+          BoolString([client isConnectedOnInterface:1]),
+          BoolString([client needsToDisconnectOnInterface:1]));
 
-    Log("client is not connected on any interface");
+    Log(@"client is not connected on any interface");
     return NO;
 }
 
@@ -44,15 +44,15 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
                               hwVersion:(NSString *)hwVersion
                               swVersion:(NSString *)swVersion
                                 swBuild:(NSString *)swBuild {
-    Log("incomingPresence hook fired: hw=%s sw=%s build=%s",
-           CStringOrPlaceholder(hwVersion),
-           CStringOrPlaceholder(swVersion),
-           CStringOrPlaceholder(swBuild));
+    Log(@"incomingPresence hook fired: hw=%@ sw=%@ build=%@",
+          hwVersion,
+          swVersion,
+          swBuild);
 
     %orig;
 
     if (!ShouldReportProxyConnectedState(self)) {
-        Log("proxy connected conditions not met, skip sendProxyIsConnected");
+        Log(@"proxy connected conditions not met, skip sendProxyIsConnected");
         return;
     }
 
@@ -62,16 +62,16 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
     APSIDSProxyManager *proxyManager = [self proxyManager];
 
     if (guid.length == 0 || environmentName.length == 0 || !proxyManager) {
-        Log("missing runtime state: guid=%s environment=%s proxyManager=%s",
-               CStringOrPlaceholder(guid),
-               CStringOrPlaceholder(environmentName),
-               proxyManager ? "YES" : "NO");
+        Log(@"missing runtime state: guid=%@ environment=%@ proxyManager=%@",
+              guid,
+              environmentName,
+              BoolString(proxyManager != nil));
         return;
     }
 
-    Log("sending proxy connected: guid=%s environment=%s",
-           CStringOrPlaceholder(guid),
-           CStringOrPlaceholder(environmentName));
+    Log(@"sending proxy connected: guid=%@ environment=%@",
+          guid,
+          environmentName);
     [proxyManager sendProxyIsConnected:YES guid:guid environmentName:environmentName];
 }
 
@@ -84,12 +84,11 @@ static BOOL ShouldReportProxyConnectedState(APSProxyClient *client) {
     if (!progname) {
         return;
     }
-    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    const char *bundleIDCString = [bundleID UTF8String];
-    Log("Bundle ID   : %s", bundleIDCString);
-    Log("Program Name: %s", progname);
+    // NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    // Log(@"Bundle ID   : %@", bundleID);
+    // Log(@"Program Name: %@", StringFromCString(progname));
     if (is_equal(progname, "apsd")) {
-        Log("Initializing APSSupport...");
+        Log(@"Initializing APSSupport...");
         %init(APSSupport);
     }
 }

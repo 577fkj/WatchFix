@@ -182,7 +182,7 @@ static void WatchFixMediaSyncInvokeCompletion(id completion) {
 static void WatchFixMediaSyncPresentUnreachableServiceAlert(void) {
     void *handle = dlopen(kWFMSSBridgePreferencesFrameworkPath, RTLD_LAZY);
     if (!handle) {
-        Log("failed to open BridgePreferences.framework");
+        Log(@"failed to open BridgePreferences.framework");
         return;
     }
 
@@ -192,7 +192,7 @@ static void WatchFixMediaSyncPresentUnreachableServiceAlert(void) {
         "BPSPresentGizmoUnreachableServiceAlertWithDismissalHandler");
     if (!function) {
         dlclose(handle);
-        Log("failed to resolve BPSPresentGizmoUnreachableServiceAlertWithDismissalHandler");
+        Log(@"failed to resolve BPSPresentGizmoUnreachableServiceAlertWithDismissalHandler");
         return;
     }
 
@@ -207,7 +207,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
     WFMSSKincaidSyncHelper *helper = [WFMSSKincaidSyncHelper sharedInstance];
     NSData *multiverseData = [helper multiverseDataFromMediaModelObject:modelObject];
     if (multiverseData.length == 0) {
-        Log("unable to derive multiverse data");
+        Log(@"unable to derive multiverse data");
         return nil;
     }
 
@@ -217,7 +217,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
     } else if ([modelObject isKindOfClass:[MPModelPlaylist class]]) {
         containerType = WFMSSContainerTypePlaylist;
     } else {
-        Log("unsupported model object class: %s", object_getClassName(modelObject));
+        Log(@"unsupported model object class: %@", StringFromCString(object_getClassName(modelObject)));
         return nil;
     }
 
@@ -225,7 +225,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
     PBDataWriter *policyWriter = [[NSClassFromString(@"PBDataWriter") alloc] init];
     PBDataWriter *outerWriter = [[NSClassFromString(@"PBDataWriter") alloc] init];
     if (!innerWriter || !policyWriter || !outerWriter) {
-        Log("PBDataWriter unavailable");
+        Log(@"PBDataWriter unavailable");
         return nil;
     }
 
@@ -317,7 +317,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
 - (id)modelObjectOfClass:(Class)modelClass withPersistentID:(int64_t)persistentID {
     id modelKind = [NSClassFromString(@"MPModelKind") kindWithModelClass:modelClass];
     if (!modelKind) {
-        Log("MPModelKind unavailable for %s", class_getName(modelClass));
+        Log(@"MPModelKind unavailable for %@", StringFromCString(class_getName(modelClass)));
         return nil;
     }
 
@@ -327,7 +327,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
                         [identifierSet setDeviceLibraryPersistentID:persistentID];
                     }];
     if (!identifierSet) {
-        Log("failed to build MPIdentifierSet");
+        Log(@"failed to build MPIdentifierSet");
         return nil;
     }
 
@@ -351,14 +351,14 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
     id identifiers = [modelObject respondsToSelector:@selector(identifiers)] ? [modelObject identifiers] : nil;
     id libraryIdentifiers = [identifiers respondsToSelector:@selector(library)] ? [identifiers library] : nil;
     if (![libraryIdentifiers respondsToSelector:@selector(persistentID)]) {
-        Log("model object has no library persistent identifier");
+        Log(@"model object has no library persistent identifier");
         return nil;
     }
 
     int64_t persistentID = (int64_t)[libraryIdentifiers persistentID];
     id mediaLibrary = [NSClassFromString(@"MPMediaLibrary") defaultMediaLibrary];
     if (!mediaLibrary) {
-        Log("MPMediaLibrary unavailable");
+        Log(@"MPMediaLibrary unavailable");
         return nil;
     }
 
@@ -385,7 +385,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
         self.serviceQueue = dispatch_queue_create(queueName.UTF8String, DISPATCH_QUEUE_SERIAL);
         self.service = [[NSClassFromString(@"IDSService") alloc] initWithService:kWFMSSIDSServiceName];
         if (!self.service) {
-            Log("IDSService unavailable for %s", kWFMSSIDSServiceName.UTF8String);
+            Log(@"IDSService unavailable for %@", kWFMSSIDSServiceName);
             return;
         }
 
@@ -406,7 +406,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
 
     [self ensureService];
     if (!self.service || !IDSDefaultPairedDevice) {
-        Log("IDS route unavailable");
+        Log(@"IDS route unavailable");
         return nil;
     }
 
@@ -415,7 +415,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
                         type:1
                   isResponse:NO];
     if (!requestProtobuf) {
-        Log("failed to construct IDSProtobuf");
+        Log(@"failed to construct IDSProtobuf");
         return nil;
     }
 
@@ -434,7 +434,7 @@ static NSData *WatchFixMediaSyncBuildKeepLocalRequestPayload(id modelObject, BOO
                                    identifier:&responseIdentifier
                                         error:&sendError];
     if (!didSend) {
-        Log("IDS send failed: %s", CStringOrPlaceholder(sendError.localizedDescription));
+        Log(@"IDS send failed: %@", sendError.localizedDescription);
         return nil;
     }
 
@@ -476,7 +476,7 @@ didSendWithSuccess:(BOOL)didSend
         return;
     }
 
-    Log("IDS send callback reported failure: %s", CStringOrPlaceholder(error.localizedDescription));
+    Log(@"IDS send callback reported failure: %@", error.localizedDescription);
     [self completePendingRequestForResponseIdentifier:identifier success:NO];
     WatchFixMediaSyncPresentUnreachableServiceAlert();
 }
@@ -514,7 +514,7 @@ incomingUnhandledProtobuf:(id)protobuf
 
     int64_t persistentID = WatchFixMediaSyncPersistentIDFromToken(album);
     if (persistentID == 0) {
-        Log("failed to extract album persistent ID");
+        Log(@"failed to extract album persistent ID");
         WatchFixMediaSyncInvokeCompletion(completion);
         return;
     }
@@ -540,7 +540,7 @@ incomingUnhandledProtobuf:(id)protobuf
 
     int64_t persistentID = WatchFixMediaSyncPersistentIDFromToken(playlist);
     if (persistentID == 0) {
-        Log("failed to extract playlist persistent ID");
+        Log(@"failed to extract playlist persistent ID");
         WatchFixMediaSyncInvokeCompletion(completion);
         return;
     }
@@ -566,7 +566,7 @@ incomingUnhandledProtobuf:(id)protobuf
 
     int64_t persistentID = WatchFixMediaSyncPersistentIDFromToken(album);
     if (persistentID == 0) {
-        Log("failed to extract album persistent ID for unpin");
+        Log(@"failed to extract album persistent ID for unpin");
         WatchFixMediaSyncInvokeCompletion(completion);
         return;
     }
@@ -592,7 +592,7 @@ incomingUnhandledProtobuf:(id)protobuf
 
     int64_t persistentID = WatchFixMediaSyncPersistentIDFromToken(playlist);
     if (persistentID == 0) {
-        Log("failed to extract playlist persistent ID for unpin");
+        Log(@"failed to extract playlist persistent ID for unpin");
         WatchFixMediaSyncInvokeCompletion(completion);
         return;
     }
@@ -616,16 +616,16 @@ incomingUnhandledProtobuf:(id)protobuf
 
 %ctor {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
-    Log("Bundle ID   : %s", CStringOrPlaceholder(bundleIdentifier));
-    Log("Program Name: %s", getprogname());
+    Log(@"Bundle ID   : %@", bundleIdentifier);
+    Log(@"Program Name: %@", StringFromCString(getprogname()));
 
     if (![bundleIdentifier isEqualToString:@"com.apple.Bridge"] &&
         ![bundleIdentifier isEqualToString:@"com.apple.NanoMusicSync"]) {
         return;
     }
 
-    if (isOSVersionAtLeast(16, 0, 0)) {
-        Log("running on iOS 16 or newer, skipping MediaSyncSupport hooks");
+    if (IOSVersionAtLeast(16, 0, 0)) {
+        Log(@"running on iOS 16 or newer, skipping MediaSyncSupport hooks");
         return;
     }
 
@@ -633,11 +633,11 @@ incomingUnhandledProtobuf:(id)protobuf
     dispatch_once(&onceToken, ^{
         Class managerClass = objc_lookUpClass("NMSMediaPinningManager");
         if (!managerClass) {
-            Log("NMSMediaPinningManager not found, skipping MediaSyncSupport");
+            Log(@"NMSMediaPinningManager not found, skipping MediaSyncSupport");
             return;
         }
 
         %init(MediaSyncSupportHooks, WFMediaPinningManager=managerClass);
-        Log("MediaSyncSupport hooks installed");
+        Log(@"MediaSyncSupport hooks installed");
     });
 }

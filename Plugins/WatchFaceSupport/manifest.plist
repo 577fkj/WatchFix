@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.WatchFaceSupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array>
+				<string>com.apple.Bridge</string>
+				<string>com.apple.NTKFaceSnapshotService</string>
+			</array>
+			<key>Executables</key>
+			<array>
+				<string>nanotimekitcompaniond</string>
+			</array>
+		</dict>
+		<key>WFPluginMinimumSystemVersion</key>
+		<integer>983040</integer> <!-- 15.0.0 -->
+		<key>WFPluginNanoCapabilities</key>
+		<array/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>nanotimekitcompaniond</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.Bridge</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.WatchFaceSupport.title</string>
+	</dict>
+</dict>
+</plist>

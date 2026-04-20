@@ -1,7 +1,0 @@
-{
-    Filter = {
-        Executables = (
-            "identityservicesd"
-        );
-    };
-}

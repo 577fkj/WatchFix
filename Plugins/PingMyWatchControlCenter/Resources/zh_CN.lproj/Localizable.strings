@@ -1,3 +1,5 @@
+"plugin.PingMyWatchControlCenter.title" = "Ping My Watch";
+"plugin.PingMyWatchControlCenter.detail" = "添加 Apple Watch 查找控制中心模块。";
 "WFPMWAlertTitle" = "呼叫我的 Apple Watch";
 "WFPMWAlertDismiss" = "好的";
 "WFPMWAlertMessageUnreachable" = "无法连接到 Apple Watch。";

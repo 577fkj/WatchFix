@@ -1,0 +1,5 @@
+#import "Bridge/Plugin/PluginBridge.h"
+#import "Bridge/Watch/WatchBridge.h"
+#import "Bridge/Scanner/ScannerBridge.h"
+#import "Logging.h"
+#import "WatchDeviceDatabase.h"

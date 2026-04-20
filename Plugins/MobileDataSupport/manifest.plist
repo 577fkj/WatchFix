@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.MobileDataSupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array/>
+			<key>Executables</key>
+			<array>
+				<string>CommCenter</string>
+			</array>
+		</dict>
+		<key>WFPluginNanoCapabilities</key>
+		<array>
+			<string>4AA3FF3B-3224-42E6-995E-481F49AE9260</string>
+		</array>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>CommCenter</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.mobilephone</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.MobileDataSupport.title</string>
+	</dict>
+</dict>
+</plist>

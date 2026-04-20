@@ -215,7 +215,7 @@ static BOOL WatchFixSyncControllerIsFor(id controller) {
     Class importControllerClass = NSClassFromString(@"PHImportController");
     Class importOptionsClass = NSClassFromString(@"PHImportOptions");
     if (!importControllerClass || !importOptionsClass) {
-        Log("PHImportController or PHImportOptions unavailable");
+        Log(@"PHImportController or PHImportOptions unavailable");
         return;
     }
 
@@ -311,7 +311,7 @@ static BOOL WatchFixSyncControllerIsFor(id controller) {
 
     id destinationID = WatchFixIDSDestinationForDevice(self.idsDevice);
     if (!destinationID) {
-        Log("missing IDS destination for photo sync protobuf");
+        Log(@"missing IDS destination for photo sync protobuf");
         return;
     }
 
@@ -325,7 +325,7 @@ static BOOL WatchFixSyncControllerIsFor(id controller) {
                     identifier:&identifier
                          error:&error];
     if (error) {
-        Log("failed to send photo sync signal: %s", CStringOrPlaceholder(error.localizedDescription));
+        Log(@"failed to send photo sync signal: %@", error.localizedDescription);
     }
 }
 
@@ -424,8 +424,8 @@ incomingUnhandledProtobuf:(IDSProtobuf *)protobuf
                                                       error:&error];
 
                         if (error) {
-                            Log("failed to send exported photo resource: %s",
-                                CStringOrPlaceholder(error.localizedDescription));
+                            Log(@"failed to send exported photo resource: %@",
+                                  error.localizedDescription);
                         }
                     }];
                 }];
@@ -480,7 +480,7 @@ incomingUnhandledProtobuf:(IDSProtobuf *)protobuf
 
     id destinationID = WatchFixIDSDestinationForDevice(self.idsDevice);
     if (!destinationID) {
-        Log("missing IDS destination for photo sync protobuf");
+        Log(@"missing IDS destination for photo sync protobuf");
         return;
     }
 
@@ -494,7 +494,7 @@ incomingUnhandledProtobuf:(IDSProtobuf *)protobuf
                     identifier:&identifier
                          error:&error];
     if (error) {
-        Log("failed to send photo sync snapshot response: %s", CStringOrPlaceholder(error.localizedDescription));
+        Log(@"failed to send photo sync snapshot response: %@", error.localizedDescription);
     }
 }
 
@@ -571,7 +571,7 @@ incomingResourceAtURL:(NSURL *)incomingURL
             [[PLSImportManager sharedManager] importAssetsAtURLs:@[ temporaryURL ]];
             unlink(temporaryURL.fileSystemRepresentation);
         } else {
-            Log("clonefile failed for incoming photo resource at %s", incomingURL.path.UTF8String);
+            Log(@"clonefile failed for incoming photo resource at %@", incomingURL.path);
         }
         return;
     }
@@ -611,7 +611,7 @@ incomingResourceAtURL:(NSURL *)incomingURL
     } error:&error];
 
     if (error) {
-        Log("failed to import Jupiter inbound file: %s", CStringOrPlaceholder(error.localizedDescription));
+        Log(@"failed to import Jupiter inbound file: %@", error.localizedDescription);
     }
 }
 
@@ -697,19 +697,17 @@ incomingResourceAtURL:(NSURL *)incomingURL
         return;
     }
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    const char *bundleIDCString = [bundleID UTF8String];
-    Log("Bundle ID   : %s", bundleIDCString);
-    Log("Program Name: %s", progname);
-
+    Log(@"Bundle ID   : %@", bundleID);
+    Log(@"Program Name: %@", StringFromCString(progname));
     if (!is_equal("nptocompaniond", progname)) {
         return;
     }
 
     NSInteger hostOSMajorVersion = [NSProcessInfo processInfo].operatingSystemVersion.majorVersion;
-    Log("initializing PhotoLibrarySupport for host major %ld", (long)hostOSMajorVersion);
+    Log(@"initializing PhotoLibrarySupport for host major %ld", (long)hostOSMajorVersion);
 
     if (hostOSMajorVersion >= 17) {
-        Log("host major version >= 17, skipping PhotoLibrarySupport hooks");
+        Log(@"host major version >= 17, skipping PhotoLibrarySupport hooks");
         return;
     }
 

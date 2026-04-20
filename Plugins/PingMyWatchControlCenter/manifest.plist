@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginTitle</key>
+		<string>plugin.PingMyWatchControlCenter.title</string>
+		<key>WFPluginDetail</key>
+		<string>plugin.PingMyWatchControlCenter.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array/>
+			<key>Executables</key>
+			<array/>
+		</dict>
+		<key>WFPluginNanoCapabilities</key>
+		<array>
+			<string>C5BAD2E8-BB79-4E9E-8A0D-757C60D31053</string>
+		</array>
+		<key>WFPluginPresentAsTool</key>
+		<true/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>Preferences</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>cn.fkj233.watchfix.PingMyWatchControlCenter.SettingsIcon</string>
+	</dict>
+</dict>
+</plist>

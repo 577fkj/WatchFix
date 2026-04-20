@@ -54,7 +54,7 @@ static BOOL CopyValidationContextProductTypeAndWatchOS(const void *validateConte
     }
 
     const uint8_t *contextBytes = reinterpret_cast<const uint8_t *>(validateContext);
-    const BOOL usesLegacyOffsets = !isOSVersionAtLeast(14, 5, 0);
+    BOOL usesLegacyOffsets = !IOSVersionAtLeast(14, 5, 0);
     const size_t productTypeOffset = usesLegacyOffsets ? 0x38 : 0x20;
     const size_t encodedWatchOSOffset = usesLegacyOffsets ? 0x50 : 0x38;
 
@@ -151,16 +151,16 @@ static NRDevice *CopyFirstMatchingPairedWatch(const char *requestedProductTypeCS
 
 static BOOL PairedWatchMeetsMobileDataRepairRequirements(const void *validateContext,
                                                          uint32_t minimumWatchOS) {
-    Log("validating paired watch for minimum watchOS 0x%X", minimumWatchOS);
+    Log(@"validating paired watch for minimum watchOS 0x%X", minimumWatchOS);
     if (!validateContext) {
-        Log("no validation context provided");
+        Log(@"no validation context provided");
         return NO;
     }
 
     NSData *cacheKey = CopyCacheKeyFromValidationContext(validateContext);
     NSNumber *cachedState = CopyCachedRepairState(cacheKey);
     if (cachedState) {
-        Log("returning cached repair state: %s", cachedState.boolValue ? "SUPPORTED" : "NOT SUPPORTED");
+        Log(@"returning cached repair state: %@", cachedState.boolValue ? @"SUPPORTED" : @"NOT SUPPORTED");
         return cachedState.boolValue;
     }
 
@@ -169,26 +169,27 @@ static BOOL PairedWatchMeetsMobileDataRepairRequirements(const void *validateCon
     if (!CopyValidationContextProductTypeAndWatchOS(validateContext,
                                                     &requestedProductType,
                                                     &encodedWatchOS)) {
-        Log("failed to extract product type and watchOS version from validation context");
+        Log(@"failed to extract product type and watchOS version from validation context");
         return NO;
     }
 
     if ((encodedWatchOS >> 24) != 0) {
-        Log("encoded watchOS version 0x%X has non-zero major version, which is unexpected and cannot be handled",
+        Log(@"encoded watchOS version 0x%X has non-zero major version, which is unexpected and cannot be handled",
                encodedWatchOS);
         StoreCachedRepairState(cacheKey, NO);
         return NO;
     }
 
+    NSString *requestedProductTypeString = StringFromCString(requestedProductType.c_str());
     if (requestedProductType.rfind("Watch", 0) != 0) {
-        Log("requested product type '%s' does not start with 'Watch', cannot validate",
-               requestedProductType.c_str());
+        Log(@"requested product type '%@' does not start with 'Watch', cannot validate",
+              requestedProductTypeString);
         StoreCachedRepairState(cacheKey, NO);
         return NO;
     }
 
     if (encodedWatchOS < minimumWatchOS) {
-        Log("encoded watchOS version 0x%X does not meet minimum watchOS requirement 0x%X",
+        Log(@"encoded watchOS version 0x%X does not meet minimum watchOS requirement 0x%X",
                encodedWatchOS,
                minimumWatchOS);
         StoreCachedRepairState(cacheKey, NO);
@@ -197,25 +198,25 @@ static BOOL PairedWatchMeetsMobileDataRepairRequirements(const void *validateCon
 
     dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
     __block NRDevice *matchedWatch = nil;
-    NSString *productType = [NSString stringWithUTF8String:requestedProductType.c_str()];
+    NSString *productType = requestedProductTypeString;
     const char *requestedProductTypeCString = productType.UTF8String;
     dispatch_async(WatchFixMobileDataLookupQueue(), ^{
-        Log("performing paired watch lookup for product type '%s'", requestedProductTypeCString);
+        Log(@"performing paired watch lookup for product type '%@'", productType);
         matchedWatch = CopyFirstMatchingPairedWatch(requestedProductTypeCString, minimumWatchOS);
         dispatch_semaphore_signal(semaphore);
     });
 
     BOOL signaled = dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC)) == 0;
     if (!signaled || !matchedWatch) {
-        Log("paired watch lookup timed out or returned no match for %s", requestedProductTypeCString ?: "<nil>");
+        Log(@"paired watch lookup timed out or returned no match for %@", productType);
         return NO;
     }
 
     BOOL supportsCapability = [matchedWatch supportsCapability:WatchFixMobileDataCapabilityUUID()];
     StoreCachedRepairState(cacheKey, supportsCapability);
-    Log("paired watch %s cellular capability for %s",
-           supportsCapability ? "supports" : "does not support",
-           requestedProductTypeCString ?: "<nil>");
+    Log(@"paired watch %@ cellular capability for %@",
+          supportsCapability ? @"supports" : @"does not support",
+          productType);
     return supportsCapability;
 }
 
@@ -236,21 +237,21 @@ static BOOL WrappedValidateCellularPlanDevice(WatchFixValidateDeviceBlock origin
                                               uint64_t maskedMessageTypes,
                                               void *deviceContext) {
     if (originalValidateBlock && originalValidateBlock(deviceContext)) {
-        Log("original validate callback returned YES, skip MobileDataSupport validation");
+        Log(@"original validate callback returned YES, skip MobileDataSupport validation");
         return YES;
     }
 
     if (maskedMessageTypes & 0x20) {
-        Log("validating for message type 0x20");
+        Log(@"validating for message type 0x20");
         return PairedWatchMeetsMobileDataRepairRequirements(deviceContext, 0x40000);
     }
 
     if (maskedMessageTypes & 0x200) {
-        Log("validating for message type 0x200");
+        Log(@"validating for message type 0x200");
         return PairedWatchMeetsMobileDataRepairRequirements(deviceContext, 0x70000);
     }
 
-    Log("unsupported message types 0x%llx, cannot validate", maskedMessageTypes);
+    Log(@"unsupported message types 0x%llx, cannot validate", maskedMessageTypes);
 
     return NO;
 }
@@ -307,7 +308,7 @@ supportedIncomingMessageTypes:(uint64_t)supportedIncomingMessageTypes
   incomingMessageCallback:(id)incomingMessageCallback {
     uint64_t maskedMessageTypes = supportedIncomingMessageTypes & 0x7FFF;
     if (!WatchFixShouldWrapValidateCallback(maskedMessageTypes)) {
-        Log("skipping validate callback wrapper for unsupported message types 0x%llx", maskedMessageTypes);
+        Log(@"skipping validate callback wrapper for unsupported message types 0x%llx", maskedMessageTypes);
         return %orig(name,
                      maskedMessageTypes,
                      validateDeviceCallback,
@@ -316,9 +317,9 @@ supportedIncomingMessageTypes:(uint64_t)supportedIncomingMessageTypes
     }
 
     if (validateDeviceCallback && !WatchFixIsBlockObject(validateDeviceCallback)) {
-        Log("validate callback %p is not a block, skipping wrapper for message types 0x%llx",
-            validateDeviceCallback,
-            maskedMessageTypes);
+        Log(@"validate callback %p is not a block, skipping wrapper for message types 0x%llx",
+              (__bridge void *)validateDeviceCallback,
+              maskedMessageTypes);
         return %orig(name,
                      maskedMessageTypes,
                      validateDeviceCallback,
@@ -332,10 +333,10 @@ supportedIncomingMessageTypes:(uint64_t)supportedIncomingMessageTypes
                                                  maskedMessageTypes,
                                                  deviceContext);
     };
-    Log("wrapping validate callback %p as heap block %p for message types 0x%llx",
-        validateDeviceCallback,
-        originalValidateBlock,
-        maskedMessageTypes);
+    Log(@"wrapping validate callback %p as heap block %p for message types 0x%llx",
+          (__bridge void *)validateDeviceCallback,
+          (void *)originalValidateBlock,
+          maskedMessageTypes);
 
     return %orig(name,
                  maskedMessageTypes,
@@ -350,23 +351,27 @@ supportedIncomingMessageTypes:(uint64_t)supportedIncomingMessageTypes
 
 %ctor {
     const char *progname = getprogname();
+    if (!progname) {
+        return;
+    }
+
     if (!starts_with("CommCenter", progname)) {
         return;
     }
 
-    if (isOSVersionAtLeast(17, 0, 0)) {
-        Log("skip MobileDataSupport on iOS 17 or later");
+    if (IOSVersionAtLeast(17, 0, 0)) {
+        Log(@"skip MobileDataSupport on iOS 17 or later");
         return;
     }
 
-    Log("initializing MobileDataSupport");
+    Log(@"initializing MobileDataSupport");
     %init(MobileDataSupportFunctionHooks);
-    Log("initialized CFPropertyListCreateWithData hook");
+    Log(@"initialized CFPropertyListCreateWithData hook");
 
     if (objc_lookUpClass("CellularPlanIDSServiceDelegate")) {
         %init(MobileDataSupportDelegateHooks);
-        Log("initialized CellularPlanIDSServiceDelegate hook");
+        Log(@"initialized CellularPlanIDSServiceDelegate hook");
     } else {
-        Log("CellularPlanIDSServiceDelegate not found, skip delegate hook");
+        Log(@"CellularPlanIDSServiceDelegate not found, skip delegate hook");
     }
 }

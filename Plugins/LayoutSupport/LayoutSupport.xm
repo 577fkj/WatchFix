@@ -231,7 +231,7 @@ static NSArray *WFOrderedNodes(id graph) {
 static id WFCreateDomainAccessor(void) {
     Class accessorClass = objc_lookUpClass("NPSDomainAccessor");
     if (!accessorClass) {
-        Log("NPSDomainAccessor is unavailable");
+        Log(@"NPSDomainAccessor is unavailable");
         return nil;
     }
 
@@ -320,7 +320,7 @@ static void WFNotifyDelegateAboutMovedNodes(id graph) {
     Class nodeClass = objc_lookUpClass("CSLHexAppNode");
     Class graphClass = objc_lookUpClass("CSLHexAppGraph");
     if (!nodeClass || !graphClass) {
-        Log("failed to rebuild layout graph because required classes are unavailable");
+        Log(@"failed to rebuild layout graph because required classes are unavailable");
         return %orig;
     }
 
@@ -508,36 +508,36 @@ static void WFNotifyDelegateAboutMovedNodes(id graph) {
 %end
 
 static BOOL WFInstallLayoutSupportHooks(void) {
-    if (isOSVersionAtLeast(17, 0, 0)) {
-        Log("LayoutSupport is not needed on iOS 17 or later");
+    if (IOSVersionAtLeast(17, 0, 0)) {
+        Log(@"LayoutSupport is not needed on iOS 17 or later");
         return NO;
     }
 
     NSBundle *bundle = [NSBundle bundleWithPath:kWFCarouselSettingsBundlePath];
     if (!bundle || ![bundle load]) {
-        Log("failed to load CarouselAppViewSettings.bundle");
+        Log(@"failed to load CarouselAppViewSettings.bundle");
         return NO;
     }
 
     Class iconPositionsStoreClass = objc_lookUpClass("CSLIconPositionsStore");
     Class hexGraphClass = objc_lookUpClass("CSLHexAppGraph");
     if (!iconPositionsStoreClass || !hexGraphClass) {
-        Log("required carousel classes are unavailable");
+        Log(@"required carousel classes are unavailable");
         return NO;
     }
 
     %init(LayoutSupportIconPositionsStoreHooks, WFIconPositionsStoreClass=iconPositionsStoreClass);
     %init(LayoutSupportHexGraphHooks, WFHexGraphClass=hexGraphClass);
 
-    Log("LayoutSupport hooks installed");
+    Log(@"LayoutSupport hooks installed");
     return YES;
 }
 
 %ctor {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     const char *programName = getprogname();
-    Log("Bundle ID   : %s", CStringOrPlaceholder(bundleIdentifier));
-    Log("Program Name: %s", programName ? programName : "<nil>");
+    Log(@"Bundle ID   : %@", bundleIdentifier);
+    Log(@"Program Name: %@", StringFromCString(programName));
 
     if (![bundleIdentifier isEqualToString:@"com.apple.Bridge"]) {
         return;

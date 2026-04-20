@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.APSSupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array/>
+			<key>Executables</key>
+			<array>
+				<string>apsd</string>
+			</array>
+		</dict>
+		<key>WFPluginMinimumSystemVersion</key>
+		<integer>917504</integer> <!-- 14.0.0 -->
+		<key>WFPluginMinimumWatchOSVersion</key>
+		<integer>655360</integer> <!-- 10.0.0 -->
+		<key>WFPluginNanoCapabilities</key>
+		<array/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>apsd</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.MobileSMS</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.APSSupport.title</string>
+	</dict>
+</dict>
+</plist>

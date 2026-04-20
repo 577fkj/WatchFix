@@ -1,36 +1,70 @@
 #!/bin/bash
 
-GUI_SERVICES=(
-    "com.apple.apsd"
-    "com.apple.appconduitd"
-    "com.apple.MobileInstallationHelperService"
-    "com.apple.identityservicesd"
-    "com.apple.nanoregistryd"
-    "com.apple.CommCenter"
-    "com.apple.nanotimekitcompaniond"
-    "com.apple.nptocompaniond"
-    "com.apple.nanomapscd"
-)
-
-SYS_SERVICES=(
-    "installd"
-    "SharingViewService"
-    "Bridge"
-    "Preferences"
-    "SpringBoard"
-)
-
-echo "WatchFix: Terminating processes..."
-
-for service in "${GUI_SERVICES[@]}"; do
-    echo "Terminating $service..."
-    launchctl kill 9 user/501/"$service" 2>/dev/null
-done
-
-for service in "${SYS_SERVICES[@]}"; do
-    echo "Terminating $service..."
-    killall -9 "$service" 2>/dev/null
-done
-
-echo "WatchFix: Done."
 exit 0
+
+# set -e
+
+# resolve_jbroot() {
+#     for cmd in /usr/bin/jbroot /var/jb/usr/bin/jbroot jbroot; do
+#         if command -v "$cmd" >/dev/null 2>&1; then
+#             rooted="$($cmd 2>/dev/null)"
+#             if [ -n "$rooted" ] && [ "${rooted#/}" != "$rooted" ]; then
+#                 printf '%s' "$rooted"
+#                 return 0
+#             fi
+#         elif [ -x "$cmd" ]; then
+#             rooted="$($cmd 2>/dev/null)"
+#             if [ -n "$rooted" ] && [ "${rooted#/}" != "$rooted" ]; then
+#                 printf '%s' "$rooted"
+#                 return 0
+#             fi
+#         fi
+#     done
+
+#     if [ -d /var/jb ]; then
+#         rooted="$(cd /var/jb 2>/dev/null && pwd -P)"
+#         if [ -n "$rooted" ] && [ "${rooted#/}" != "$rooted" ]; then
+#             printf '%s' "$rooted"
+#             return 0
+#         fi
+#     fi
+
+#     return 1
+# }
+
+# JBROOT="$(resolve_jbroot || true)"
+
+# GUI_SERVICES=(
+#     "com.apple.apsd"
+#     "com.apple.appconduitd"
+#     "com.apple.MobileInstallationHelperService"
+#     "com.apple.identityservicesd"
+#     "com.apple.nanoregistryd"
+#     "com.apple.CommCenter"
+#     "com.apple.nanotimekitcompaniond"
+#     "com.apple.nptocompaniond"
+#     "com.apple.nanomapscd"
+# )
+
+# SYS_SERVICES=(
+#     "installd"
+#     "SharingViewService"
+#     "Bridge"
+#     "Preferences"
+#     "SpringBoard"
+# )
+
+# echo "WatchFix: Terminating processes..."
+
+# for service in "${GUI_SERVICES[@]}"; do
+#     echo "Terminating $service..."
+#     launchctl kill 9 user/501/"$service" 2>/dev/null || true
+# done
+
+# for service in "${SYS_SERVICES[@]}"; do
+#     echo "Terminating $service..."
+#     killall -9 "$service" 2>/dev/null || true
+# done
+
+# echo "WatchFix: Done."
+# exit 0

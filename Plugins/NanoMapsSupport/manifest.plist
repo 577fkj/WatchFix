@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.NanoMapsSupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array/>
+			<key>Executables</key>
+			<array>
+				<string>nanomapscd</string>
+			</array>
+		</dict>
+        <key>WFPluginMaximumSystemVersion</key>
+        <integer>1048575</integer> <!-- 16.0.0 -->
+		<key>WFPluginMinimumWatchOSVersion</key>
+		<integer>589824</integer> <!-- 9.0.0 -->
+		<key>WFPluginNanoCapabilities</key>
+		<array/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>nanomapscd</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.Maps</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.NanoMapsSupport.title</string>
+	</dict>
+</dict>
+</plist>

@@ -348,8 +348,8 @@ static WFSStubFaceConfiguration *WatchFixStubConfigurationFromFace(WFSStubFace *
     @try {
         [self setValue:[[WFSStubFaceConfiguration alloc] init] forKey:@"_configuration"];
     } @catch (NSException *exception) {
-        Log("failed to install stub face configuration: %s",
-            CStringOrPlaceholder(exception.reason));
+        Log(@"failed to install stub face configuration: %@",
+              exception.reason);
     }
 }
 
@@ -400,7 +400,7 @@ static WFSStubFaceConfiguration *WatchFixStubConfigurationFromFace(WFSStubFace *
     @try {
         [self setValue:targetConfiguration forKey:@"_configuration"];
     } @catch (NSException *exception) {
-        Log("failed to apply stub configuration: %s", CStringOrPlaceholder(exception.reason));
+        Log(@"failed to apply stub configuration: %@", exception.reason);
         return NO;
     }
     return YES;
@@ -661,25 +661,25 @@ static void WatchFixInstallWatchFaceSupportHooks(void) {
     Class faceClass = objc_lookUpClass("NTKFace");
     Class bundleManagerClass = objc_lookUpClass("NTKFaceBundleManager");
     if (!faceClass || !bundleManagerClass) {
-        Log("required NanoTimeKit classes are unavailable, skipping WatchFaceSupport");
+        Log(@"required NanoTimeKit classes are unavailable, skipping WatchFaceSupport");
         return;
     }
 
     WatchFixSharedStubFaceBundle();
 
     %init(WatchFaceSupportFaceFactory, NTKFace=faceClass);
-    Log("face factory hooks installed");
+    Log(@"face factory hooks installed");
 
     %init(WatchFaceSupportLookupLegacy, NTKFaceBundleManager=bundleManagerClass);
-    Log("legacy bundle lookup hook installed");
+    Log(@"legacy bundle lookup hook installed");
     %init(WatchFaceSupportLookupMigration, NTKFaceBundleManager=bundleManagerClass);
-    Log("migration bundle lookup hook installed");
+    Log(@"migration bundle lookup hook installed");
 
     %init(WatchFaceSupportEnumerateLegacy, NTKFaceBundleManager=bundleManagerClass);
-    Log("legacy bundle enumeration hook installed");
+    Log(@"legacy bundle enumeration hook installed");
 
     %init(WatchFaceSupportEnumerateModern, NTKFaceBundleManager=bundleManagerClass);
-    Log("modern bundle enumeration hook installed");
+    Log(@"modern bundle enumeration hook installed");
 }
 
 %ctor {
@@ -689,18 +689,17 @@ static void WatchFixInstallWatchFaceSupportHooks(void) {
     }
 
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    const char *bundleIDCString = [bundleID UTF8String];
-    Log("Bundle ID   : %s", bundleIDCString);
-    Log("Program Name: %s", progname);
+    Log(@"Bundle ID   : %@", bundleID);
+    Log(@"Program Name: %@", StringFromCString(progname));
 
-    if (!is_equal(bundleIDCString, "com.apple.Bridge") && !is_equal(progname, "nanotimekitcompaniond")) {
+    if (![bundleID isEqualToString:@"com.apple.Bridge"] && !is_equal(progname, "nanotimekitcompaniond")) {
         return;
     }
 
     
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        Log("installing WatchFaceSupport hooks");
+        Log(@"installing WatchFaceSupport hooks");
         WatchFixInstallWatchFaceSupportHooks();
     });
 }

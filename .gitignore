@@ -4,3 +4,8 @@ packages/
 doc/
 memory/
 AGENTS.md
+Utils/.stamp
+__pycache__/
+*.pyc
+*.pyo
+.github/copilot-instructions.md

@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.h": "objective-cpp"
+  },
+  "C_Cpp.default.intelliSenseMode": "macos-clang-arm64"
+}

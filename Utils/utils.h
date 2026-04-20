@@ -1,16 +1,14 @@
-#include <stdarg.h>
-#include <syslog.h>
+#import <Foundation/Foundation.h>
+#import "Logging.h"
 
-#define LOG_PREFIX "[WatchFix][%s] "
-
-void CLog(const char *file, const char *format, ...);
-const char *CStringOrPlaceholder(NSString *value);
+NSString *StringFromCString(const char *value);
+NSString *BoolString(BOOL value);
+NSString *safe_jbroot(NSString *path);
 id CopyObjectIvarValueByName(id object, const char *name, Class expectedClass);
-BOOL HookInstanceMethod(Class cls, SEL originalSelector, SEL replacementSelector);
 bool is_equal(const char *s1, const char *s2);
 bool starts_with(const char *pre, const char *str);
 bool is_empty(const char *str);
-bool isOSVersionAtLeast(int major, int minor, int patch);
 
-#define Log(format, ...) CLog(__FILE__, format, ##__VA_ARGS__)
-
+// Real iOS version check via sysctl — bypasses any NSProcessInfo hook.
+// Returns YES if the actual running iOS version is >= major.minor.patch.
+BOOL IOSVersionAtLeast(NSInteger major, NSInteger minor, NSInteger patch);

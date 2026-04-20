@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginConfigurationClass</key>
+		<string>PairingCompatibilityPluginConfiguration</string>
+		<key>WFPluginDetail</key>
+		<string>plugin.PairingCompatibility.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array>
+				<string>com.apple.private.NanoRegistry</string>
+			</array>
+			<key>Executables</key>
+			<array>
+				<string>SpringBoard</string>
+				<string>nanoregistryd</string>
+				<string>identityservicesd</string>
+				<string>bluetoothd</string>
+				<string>Bridge</string>
+				<string>companionproxyd</string>
+				<string>terminusd</string>
+				<string>pairedsyncd</string>
+				<string>nanoregistrylaunchd</string>
+				<string>appconduitd</string>
+				<string>installd</string>
+				<string>apsd</string>
+				<string>imagent</string>
+				<string>nptocompaniond</string>
+				<string>passd</string>
+			</array>
+		</dict>
+		<key>WFPluginNanoCapabilities</key>
+		<array/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>wcd</string>
+			<string>SpringBoard</string>
+			<string>nanoregistryd</string>
+			<string>identityservicesd</string>
+			<string>bluetoothd</string>
+			<string>Bridge</string>
+			<string>companionproxyd</string>
+			<string>terminusd</string>
+			<string>pairedsyncd</string>
+			<string>nanoregistrylaunchd</string>
+			<string>appconduitd</string>
+			<string>installd</string>
+			<string>identityservicesd</string>
+			<string>apsd</string>
+			<string>imagent</string>
+			<string>nptocompaniond</string>
+			<string>passd</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.Bridge</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.PairingCompatibility.title</string>
+	</dict>
+</dict>
+</plist>

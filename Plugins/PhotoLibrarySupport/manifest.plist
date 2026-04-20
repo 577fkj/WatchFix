@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.PhotoLibrarySupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array/>
+			<key>Executables</key>
+			<array>
+				<string>nptocompaniond</string>
+			</array>
+		</dict>
+		<key>WFPluginOSRestrictions</key>
+		<array>
+			<dict>
+				<key>WFPluginMaximumSystemVersion</key>
+				<integer>983039</integer> <!-- 15.0.0 -->
+				<key>WFPluginMinimumSystemVersion</key>
+				<integer>851968</integer> <!-- 13.0.0 -->
+				<key>WFPluginMinimumWatchOSVersion</key>
+				<integer>524288</integer> <!-- 8.0.0 -->
+			</dict>
+			<dict>
+				<key>WFPluginMaximumSystemVersion</key>
+				<integer>1048575</integer> <!-- 16.0.0 -->
+				<key>WFPluginMinimumWatchOSVersion</key>
+				<integer>589824</integer> <!-- 9.0.0 -->
+			</dict>
+			<dict>
+				<key>WFPluginMaximumSystemVersion</key>
+				<integer>1114111</integer> <!-- 17.0.0 -->
+				<key>WFPluginMinimumWatchOSVersion</key>
+				<integer>655360</integer> <!-- 10.0.0 -->
+			</dict>
+		</array>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>nptocompaniond</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.mobileslideshow</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.PhotoLibrarySupport.title</string>
+	</dict>
+</dict>
+</plist>

@@ -1,8 +1,7 @@
 PLUGIN_NAME = WatchAppSupport
-TWEAK_NAME = $(WATCHFIX_PLUGIN_PREFIX)$(PLUGIN_NAME)
-$(TWEAK_NAME)_FILES = $(wildcard ./*.xm) $(WATCHFIX_UTILS_FILES)
-$(TWEAK_NAME)_CFLAGS = -fobjc-arc $(WATCHFIX_UTILS_CFLAGS)
-$(TWEAK_NAME)_PRIVATE_FRAMEWORKS = BridgePreferences NanoRegistry PBBridgeSupport
+WATCHFIX_PLUGIN_SHORT_VERSION = 1.0.0
+WATCHFIX_PLUGIN_VERSION = 1.0.0
+WATCHFIX_PLUGIN_RESOURCE_DIRS = Resources
+WATCHFIX_PLUGIN_PRIVATE_FRAMEWORKS = BridgePreferences NanoRegistry PBBridgeSupport AppSupport
 
-include $(THEOS)/makefiles/common.mk
-include $(THEOS_MAKE_PATH)/tweak.mk
+include ../plugin.mk

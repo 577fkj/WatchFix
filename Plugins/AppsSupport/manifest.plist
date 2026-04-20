@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>WFPluginManifest</key>
+	<dict>
+		<key>WFPluginDetail</key>
+		<string>plugin.AppsSupport.detail</string>
+		<key>WFPluginHasInstallableContent</key>
+		<true/>
+		<key>WFPluginInjectionTargets</key>
+		<dict>
+			<key>Bundles</key>
+			<array>
+				<string>com.apple.InstalledContentLibrary</string>
+			</array>
+			<key>Executables</key>
+			<array>
+				<string>installd</string>
+				<string>appconduitd</string>
+				<string>com.apple.MobileInstallationHelperService</string>
+			</array>
+		</dict>
+		<key>WFPluginMinimumSystemVersion</key>
+		<integer>851968</integer> <!-- 13.0.0 -->
+        <key>WFPluginMaximumSystemVersion</key>
+        <integer>1114111</integer> <!-- 17.0.0 -->
+		<key>WFPluginMinimumWatchOSVersion</key>
+		<integer>524288</integer> <!-- 8.0.0 -->
+		<key>WFPluginNanoCapabilities</key>
+		<array/>
+		<key>WFPluginRestartExecutables</key>
+		<array>
+			<string>installd</string>
+			<string>appconduitd</string>
+			<string>com.apple.MobileInstallationHelperService</string>
+		</array>
+		<key>WFPluginScopeIdentifier</key>
+		<string>com.apple.AppStore</string>
+		<key>WFPluginTitle</key>
+		<string>plugin.AppsSupport.title</string>
+	</dict>
+</dict>
+</plist>

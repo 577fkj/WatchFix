@@ -37,7 +37,7 @@ __END_DECLS
 - (void)setFallbackImageName:(NSString *)name;
 @end
 
-@interface WatchFixBPSWatchView : UIView
+@interface BPSWatchView : UIView
 - (id)initWithStyle:(NSUInteger)style versionModifier:(id)versionModifier allowsMaterialFallback:(BOOL)allowsMaterialFallback;
 - (CGSize)screenImageSize;
 - (void)layoutWatchScreenImageView;
@@ -69,12 +69,13 @@ __END_DECLS
 - (NSMutableDictionary *)stringCache;
 @end
 
-@interface WatchFixPBBridgeAssetsManager : NSObject
-- (void)beginPullingAssetsForAdvertisingName:(NSString *)advertisingName completion:(void (^)(void))completion;
-- (void)beginPullingAssetsForDeviceMaterial:(NSInteger)material size:(NSInteger)size completion:(void (^)(NSInteger result))completion;
-- (void)beginPullingAssetsForDeviceMaterial:(NSInteger)material size:(NSInteger)size branding:(id)branding completion:(void (^)(NSInteger result))completion;
-@end
-
 @interface NSObject (WatchFixWatchAppRuntime)
 - (id)valueForProperty:(id)property;
+@end
+
+@interface PBBridgeAssetsManager : NSObject
+- (void)beginPullingAssetsForDeviceMaterial:(NSInteger)material
+                                       size:(NSInteger)size
+                                   branding:(id)branding
+                                 completion:(void (^)(NSInteger result))completion;
 @end

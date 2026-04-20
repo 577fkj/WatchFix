@@ -26,7 +26,7 @@ static BOOL WFPMWHelperWaitForCompletion(BOOL *completed,
     }
 
     if (!*completed) {
-        Log("helper timed out waiting for %s", selectorName);
+        Log(@"helper timed out waiting for %@", StringFromCString(selectorName));
         return NO;
     }
 
@@ -44,11 +44,13 @@ static BOOL WFPMWHelperInvokePingSelector(NFMWhereIsMyCompanionConnection *conne
     __block BOOL reportedSuccess = NO;
     const char *selectorName = sel_getName(selector);
 
-    Log("helper using selector %s", selectorName);
+    Log(@"helper using selector %@", StringFromCString(selectorName));
     void (^completion)(BOOL) = ^(BOOL played) {
         completed = YES;
         reportedSuccess = played;
-        Log("helper completion for %s: %s", selectorName, played ? "YES" : "NO");
+        Log(@"helper completion for %@: %@",
+              StringFromCString(selectorName),
+              BoolString(played));
     };
 
     if (selector == @selector(playSoundAndLightsOnCompanionWithCompletion:)) {
@@ -56,7 +58,7 @@ static BOOL WFPMWHelperInvokePingSelector(NFMWhereIsMyCompanionConnection *conne
     } else if (selector == @selector(playSoundOnCompanionWithCompletion:)) {
         [connection playSoundOnCompanionWithCompletion:completion];
     } else {
-        Log("helper received unsupported selector %s", selectorName);
+        Log(@"helper received unsupported selector %@", StringFromCString(selectorName));
         return NO;
     }
 
@@ -65,7 +67,7 @@ static BOOL WFPMWHelperInvokePingSelector(NFMWhereIsMyCompanionConnection *conne
     }
 
     if (!reportedSuccess) {
-        Log("helper received completion for %s with reported result NO", selectorName);
+        Log(@"helper received completion for %@ with reported result NO", StringFromCString(selectorName));
     }
 
     return YES;
@@ -75,7 +77,7 @@ int main(__unused int argc, __unused char *argv[]) {
     @autoreleasepool {
         NFMWhereIsMyCompanionConnection *connection = [NFMWhereIsMyCompanionConnection sharedDeviceConnection];
         if (!connection) {
-            Log("helper could not access sharedDeviceConnection");
+            Log(@"helper could not access sharedDeviceConnection");
             return 1;
         }
 
@@ -92,7 +94,7 @@ int main(__unused int argc, __unused char *argv[]) {
                                                     kWFPMWHelperPrimaryTimeoutSeconds);
         }
 
-        Log("helper finished ping request with result: %s", didPlay ? "YES" : "NO");
+        Log(@"helper finished ping request with result: %@", BoolString(didPlay));
         return didPlay ? 0 : 1;
     }
 }

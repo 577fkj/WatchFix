@@ -1,4 +1,6 @@
-"WFPMWAlertTitle" = "Ping My Watch";
+"plugin.PingMyWatchControlCenter.title" = "Ping My Watch";
+"plugin.PingMyWatchControlCenter.detail" = "Adds an Apple Watch ping Control Center module.";
+"WFPMWAlertTitle" = "Ping My Apple Watch";
 "WFPMWAlertDismiss" = "OK";
-"WFPMWAlertMessageUnreachable" = "Apple Watch is unreachable.";
+"WFPMWAlertMessageUnreachable" = "Unable to reach Apple Watch.";
 "WFPMWAlertMessageNotSupported" = "Your Apple Watch does not support Ping My Watch.";

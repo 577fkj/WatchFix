@@ -48,7 +48,7 @@ static void WatchFixRewritePreviewWaypoints(id previewMessage) {
 
     Class argumentClass = NSClassFromString(@"NMArgument");
     if (!argumentClass) {
-        Log("NMArgument class not found, skipping waypoint rewrite");
+        Log(@"NMArgument class not found, skipping waypoint rewrite");
         return;
     }
 
@@ -103,12 +103,11 @@ static void WatchFixRewritePreviewWaypoints(id previewMessage) {
     }
 
     NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
-    const char *bundleIDCString = [bundleID UTF8String];
-    Log("Bundle ID   : %s", bundleIDCString);
-    Log("Program Name: %s", progname);
+    Log(@"Bundle ID   : %@", bundleID);
+    Log(@"Program Name: %@", StringFromCString(progname));
 
-    if (isOSVersionAtLeast(16, 0, 0)) {
-        Log("host is iOS 16.0.0 or later, skipping NanoMapsSupport");
+    if (IOSVersionAtLeast(16, 0, 0)) {
+        Log(@"host is iOS 16.0.0 or later, skipping NanoMapsSupport");
         return;
     }
 
@@ -119,13 +118,13 @@ static void WatchFixRewritePreviewWaypoints(id previewMessage) {
     Class routePlanningControllerClass = objc_lookUpClass("NMCRoutePlanningController");
     Class nanoDirectionWaypointClass = objc_lookUpClass("NanoDirectionWaypoint");
     if (!routePlanningControllerClass || !nanoDirectionWaypointClass) {
-        Log("required Maps classes not found: route=%s waypoint=%s",
-            routePlanningControllerClass ? "YES" : "NO",
-            nanoDirectionWaypointClass ? "YES" : "NO");
+        Log(@"required Maps classes not found: route=%@ waypoint=%@",
+              BoolString(routePlanningControllerClass != Nil),
+              BoolString(nanoDirectionWaypointClass != Nil));
         return;
     }
 
-    Log("initializing NanoMapsSupport in %s", progname);
+    Log(@"initializing NanoMapsSupport in %@", StringFromCString(progname));
     %init(NanoMapsSupport,
         NMSRoutePlanningControllerClass=routePlanningControllerClass,
         NMSNanoDirectionWaypointClass=nanoDirectionWaypointClass);

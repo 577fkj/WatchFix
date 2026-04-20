@@ -101,7 +101,7 @@ static BOOL WFPMWDefaultSelectionMatchesDevice(NRDevice *device) {
 static NRDevice *WFPMWActivePairedWatch(void) {
     NRPairedDeviceRegistry *registry = [NRPairedDeviceRegistry sharedInstance];
     if (!registry) {
-        Log("NRPairedDeviceRegistry sharedInstance is unavailable");
+        Log(@"NRPairedDeviceRegistry sharedInstance is unavailable");
         return nil;
     }
 
@@ -124,7 +124,7 @@ static NSString *WFPMWHelperExecutablePath(void) {
     NSBundle *bundle = [NSBundle bundleForClass:[WFPingMyWatchControlCenterModule class]];
     NSString *bundlePath = bundle.bundlePath;
     if (bundlePath.length == 0) {
-        Log("bundle path is unavailable");
+        Log(@"bundle path is unavailable");
         return nil;
     }
 
@@ -135,7 +135,7 @@ static pid_t WFPMWLaunchPingHelper(void) {
     NSString *helperPath = WFPMWHelperExecutablePath();
     const char *path = helperPath.fileSystemRepresentation;
     if (!path) {
-        Log("helper executable path is unavailable");
+        Log(@"helper executable path is unavailable");
         return -1;
     }
 
@@ -147,11 +147,11 @@ static pid_t WFPMWLaunchPingHelper(void) {
     pid_t pid = 0;
     int spawnStatus = posix_spawn(&pid, path, NULL, NULL, argv, environ);
     if (spawnStatus != 0) {
-        Log("failed to launch helper at %s, status=%d", path, spawnStatus);
+        Log(@"failed to launch helper at %@, status=%d", helperPath, spawnStatus);
         return -1;
     }
 
-    Log("launched helper at %s with pid %d", path, pid);
+    Log(@"launched helper at %@ with pid %d", helperPath, pid);
     return pid;
 }
 
@@ -217,7 +217,7 @@ static void WFPMWShowAlert(NSString *message) {
     [self _pingDevice];
 
     [self _playGliphAnimationWithCompletion:^{
-        Log("glyph animation completed");
+        Log(@"glyph animation completed");
     }];
 }
 
@@ -248,7 +248,7 @@ static void WFPMWShowAlert(NSString *message) {
 }
 
 - (void)_pingDevice {
-    Log("sending ping to device");
+    Log(@"sending ping to device");
 
     __weak __typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_DEFAULT, 0), ^{
@@ -256,7 +256,7 @@ static void WFPMWShowAlert(NSString *message) {
             WFPMWPingResult pingResult = WFPMWPingResultUnreachable;
 
             if (![WFPingMyWatchControlCenterModule isSupported]) {
-                Log("ping my watch is not supported for the active device");
+                Log(@"ping my watch is not supported for the active device");
                 pingResult = WFPMWPingResultNotSupported;
             } else {
                 pid_t helperPID = WFPMWLaunchPingHelper();
@@ -264,11 +264,11 @@ static void WFPMWShowAlert(NSString *message) {
                     int waitStatus = 0;
                     int waitResult = waitpid(helperPID, &waitStatus, 0);
                     if (waitResult == helperPID) {
-                        Log("helper pid %d finished with wait status %d", helperPID, waitStatus);
+                        Log(@"helper pid %d finished with wait status %d", helperPID, waitStatus);
                         BOOL exitedOK = WIFEXITED(waitStatus) && WEXITSTATUS(waitStatus) == 0;
                         pingResult = exitedOK ? WFPMWPingResultSuccess : WFPMWPingResultUnreachable;
                     } else {
-                        Log("waitpid failed for helper pid %d, result=%d errno=%d", helperPID, waitResult, errno);
+                        Log(@"waitpid failed for helper pid %d, result=%d errno=%d", helperPID, waitResult, errno);
                     }
                 }
             }
