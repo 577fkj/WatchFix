@@ -4,11 +4,14 @@ on:
   push:
     paths:
       - ".github/workflows/**"
-      - "src/**"
+      - "Plugins/**"
+      - "Preferences/**"
+      - "Utils/**"
+      - "scripts/**"
+      - "App/**"
       - "layout/**"
       - "Makefile"
       - "control"
-      - "WatchFix.plist"
     tags:
       - "v*"
   workflow_dispatch:
