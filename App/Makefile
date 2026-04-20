@@ -18,7 +18,7 @@ $(APPLICATION_NAME)_SWIFT_BRIDGING_HEADER = App-Bridging-Header.h
 $(APPLICATION_NAME)_FRAMEWORKS = UIKit AVFoundation Combine
 $(APPLICATION_NAME)_PRIVATE_FRAMEWORKS = NanoRegistry NanoSystemSettings SoftwareUpdateBridge VisualPairing PBBridgeSupport AppSupport RunningBoardServices Symbolication BridgePreferences
 $(APPLICATION_NAME)_CFLAGS = -fobjc-arc -I$(CURDIR)/../Utils -I$(CURDIR)/Bridge -I$(CURDIR)/Bridge/Internal -I$(CURDIR)/Bridge/Plugin -I$(CURDIR)/Bridge/Scanner -I$(CURDIR)/Bridge/Watch
-$(APPLICATION_NAME)_LDFLAGS = -lroothide
+# $(APPLICATION_NAME)_LDFLAGS = -lroothide
 $(APPLICATION_NAME)_RESOURCE_DIRS = Resources
 $(APPLICATION_NAME)_CODESIGN_FLAGS = -S$(CURDIR)/Entitlements.xml
 

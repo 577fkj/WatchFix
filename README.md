@@ -51,6 +51,6 @@ The other functions of the plugin are still not perfect at present. I am not fam
 1. Install [theos](https://github.com/roothide/theos)
 2. Run `make package`
 
-## Credits / Remerciements
+## Credits
 
 - **[WatchPair11](https://github.com/plokijuter/WatchPair11)**: Multiple repair references
