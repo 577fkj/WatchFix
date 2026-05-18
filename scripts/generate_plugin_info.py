@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--plugin-kind", required=True, choices=["tweak", "bundle_with_tool"])
     parser.add_argument("--package-scheme", required=True)
     parser.add_argument("--executable", required=True)
-    parser.add_argument("--minimum-os-version", default="15.0")
+    parser.add_argument("--minimum-os-version", default="14.0")
     parser.add_argument("--plugin-short-version", required=True)
     parser.add_argument("--plugin-version", required=True)
     return parser.parse_args()

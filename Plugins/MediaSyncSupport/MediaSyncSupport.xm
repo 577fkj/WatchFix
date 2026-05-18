@@ -1,6 +1,5 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <Foundation/Foundation.h>
-#import <MediaPlayer/MediaPlayer.h>
 #import <dispatch/dispatch.h>
 #import <dlfcn.h>
 #import <objc/runtime.h>
@@ -61,7 +60,8 @@
 - (id)identifiers;
 @end
 
-@interface MPMediaLibrary (WatchFixMediaSyncSupport)
+@interface MPMediaLibrary : NSObject
++ (instancetype)defaultMediaLibrary;
 - (id)multiverseIdentifierForCollectionWithPersistentID:(int64_t)persistentID
                                            groupingType:(NSInteger)groupingType;
 @end

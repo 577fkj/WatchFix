@@ -2,6 +2,11 @@ import UIKit
 
 private let WFPluginCardButtonWidth: CGFloat = 124
 
+enum WFActionButtonSize {
+    case medium
+    case large
+}
+
 func WFMakeSection(title: String, footer: String? = nil, contents: [UIView]) -> UIView {
     let stack = UIStackView()
     stack.axis = .vertical
@@ -69,27 +74,57 @@ func WFMakeActionButton(
     isPrimary: Bool = true,
     isLoading: Bool = false,
     isEnabled: Bool = true,
-    buttonSize: UIButton.Configuration.Size = .large,
+    buttonSize: WFActionButtonSize = .large,
     tintColor: UIColor? = nil,
     action: @escaping () -> Void
 ) -> UIButton {
-    var configuration = isPrimary ? UIButton.Configuration.filled() : UIButton.Configuration.gray()
-    configuration.title = title
-    configuration.cornerStyle = .large
-    configuration.buttonSize = buttonSize
-    configuration.imagePadding = 8
-    configuration.showsActivityIndicator = isLoading
-    if let systemImage {
-        configuration.image = UIImage(systemName: systemImage)
+    let button = UIButton(type: .system)
+    button.addAction(UIAction { _ in
+        action()
+    }, for: .touchUpInside)
+
+    let fillColor = tintColor ?? .systemBlue
+    let isButtonEnabled = isEnabled && !isLoading
+    let titleText = isLoading ? "\(title)..." : title
+    let verticalInset: CGFloat
+    let horizontalInset: CGFloat
+
+    switch buttonSize {
+    case .medium:
+        verticalInset = 8
+        horizontalInset = 12
+        button.titleLabel?.font = .preferredFont(forTextStyle: .subheadline)
+    case .large:
+        verticalInset = 10
+        horizontalInset = 16
+        button.titleLabel?.font = .preferredFont(forTextStyle: .headline)
     }
 
-    let button = UIButton(configuration: configuration, primaryAction: UIAction { _ in
-        action()
-    })
-    button.isEnabled = isEnabled && !isLoading
-    if let tintColor {
-        button.tintColor = tintColor
+    button.setTitle(titleText, for: .normal)
+    if let systemImage, !isLoading {
+        button.setImage(UIImage(systemName: systemImage), for: .normal)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 6, bottom: 0, right: -6)
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -6, bottom: 0, right: 6)
     }
+    button.contentEdgeInsets = UIEdgeInsets(top: verticalInset, left: horizontalInset, bottom: verticalInset, right: horizontalInset)
+    button.layer.cornerRadius = 14
+    button.layer.cornerCurve = .continuous
+    button.titleLabel?.adjustsFontForContentSizeCategory = true
+    button.contentHorizontalAlignment = .center
+
+    if isPrimary {
+        button.backgroundColor = fillColor
+        button.setTitleColor(.white, for: .normal)
+        button.tintColor = .white
+    } else {
+        let foregroundColor = tintColor ?? .label
+        button.backgroundColor = .tertiarySystemGroupedBackground
+        button.setTitleColor(foregroundColor, for: .normal)
+        button.tintColor = foregroundColor
+    }
+
+    button.isEnabled = isButtonEnabled
+    button.alpha = isButtonEnabled ? 1 : 0.6
     return button
 }
 

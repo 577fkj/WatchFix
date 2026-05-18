@@ -733,21 +733,49 @@ static BOOL WFPairingApplyDeviceSupportRange(BOOL enabled, NSDictionary<NSString
                         tintColor:(UIColor *)tintColor
                           enabled:(BOOL)enabled
                            action:(SEL)action {
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
+    UIColor *fillColor = tintColor ?: UIColor.systemBlueColor;
+    UIColor *foregroundColor = tintColor ?: UIColor.labelColor;
+    NSString *buttonTitle = self.isWorking ? [title stringByAppendingString:@"..."] : title;
+
+    button.titleLabel.font = [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline];
+    button.titleLabel.adjustsFontForContentSizeCategory = YES;
+    button.layer.cornerRadius = 14;
+    button.clipsToBounds = YES;
+
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= 150000
     UIButtonConfiguration *configuration = isPrimary ? [UIButtonConfiguration filledButtonConfiguration] : [UIButtonConfiguration grayButtonConfiguration];
-    configuration.title = title;
+    configuration.title = buttonTitle;
     configuration.cornerStyle = UIButtonConfigurationCornerStyleLarge;
     configuration.buttonSize = UIButtonConfigurationSizeLarge;
     configuration.imagePadding = 8;
     configuration.showsActivityIndicator = self.isWorking;
-    if (systemImage.length > 0) {
+    if (systemImage.length > 0 && !self.isWorking) {
         configuration.image = [UIImage systemImageNamed:systemImage];
     }
+    button.configuration = configuration;
+#else
+        [button setTitle:buttonTitle forState:UIControlStateNormal];
+        if (systemImage.length > 0 && !self.isWorking) {
+            [button setImage:[UIImage systemImageNamed:systemImage] forState:UIControlStateNormal];
+            button.titleEdgeInsets = UIEdgeInsetsMake(0, 6, 0, -6);
+            button.imageEdgeInsets = UIEdgeInsetsMake(0, -6, 0, 6);
+        }
+        button.contentEdgeInsets = UIEdgeInsetsMake(10, 16, 10, 16);
+#endif
 
-    UIButton *button = [UIButton buttonWithConfiguration:configuration primaryAction:nil];
-    button.enabled = enabled && !self.isWorking;
-    if (tintColor) {
-        button.tintColor = tintColor;
+    if (isPrimary) {
+        button.backgroundColor = fillColor;
+        [button setTitleColor:UIColor.whiteColor forState:UIControlStateNormal];
+        button.tintColor = UIColor.whiteColor;
+    } else {
+        button.backgroundColor = UIColor.tertiarySystemGroupedBackgroundColor;
+        [button setTitleColor:foregroundColor forState:UIControlStateNormal];
+        button.tintColor = foregroundColor;
     }
+
+    button.enabled = enabled && !self.isWorking;
+    button.alpha = button.enabled ? 1.0 : 0.6;
     [button addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
     return button;
 }

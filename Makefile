@@ -1,14 +1,18 @@
 TARGET := iphone:clang:16.5:15.0
 ARCHS = arm64 arm64e
 INSTALL_TARGET_PROCESSES = WatchFix
-THEOS_PACKAGE_SCHEME=roothide
+THEOS_PACKAGE_SCHEME = roothide
 
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
 THEOS_PACKAGE_DIR = packages/rootless
+WATCHFIX_PACKAGE_ARCH = iphoneos-arm64
 else ifeq ($(THEOS_PACKAGE_SCHEME),roothide)
 THEOS_PACKAGE_DIR = packages/roothide
-else
-$(error "Invalid THEOS_PACKAGE_SCHEME: $(THEOS_PACKAGE_SCHEME). Must be 'rootless' or 'roothide'.")
+WATCHFIX_PACKAGE_ARCH = iphoneos-arm64e
+else # rootful
+TARGET = iphone:14.5:14.0
+THEOS_PACKAGE_DIR = packages/rootful
+WATCHFIX_PACKAGE_ARCH = iphoneos-arm
 endif
 
 THEOS_DEVICE_IP = 192.168.1.199
@@ -28,6 +32,8 @@ endif
 
 include $(THEOS)/makefiles/common.mk
 include $(THEOS_MAKE_PATH)/aggregate.mk
+
+THEOS_PACKAGE_ARCH := $(WATCHFIX_PACKAGE_ARCH)
 
 WATCHFIX_BUILD_INFO_SCRIPT := $(CURDIR)/scripts/inject_build_info.py
 WATCHFIX_BUILD_GIT_HASH = $(shell git -C "$(CURDIR)" rev-parse --short=12 HEAD 2>/dev/null)

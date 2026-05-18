@@ -28,7 +28,18 @@ struct WatchDebugInfo {
     }
 }
 
-@MainActor
+private final class SelectorInvoker: NSObject {
+    private let action: () -> Void
+
+    init(action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    @objc func invoke() {
+        action()
+    }
+}
+
 final class Store: ObservableObject {
     @Published private(set) var plugins: [PluginState] = Catalog.merge(states: [:], validationSnapshot: [:], installedVersions: [:])
     @Published var pairingSettings = PairingCompatibilitySettings()
@@ -339,21 +350,25 @@ final class Store: ObservableObject {
         fallbackTitle: String,
         completion: @escaping (Result<T, Error>) -> Void
     ) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let result: Result<T, Error>
-            do {
-                result = .success(try work())
-            } catch {
-                result = .failure(error)
+        let worker = SelectorInvoker {
+            let result = Result(catching: work)
+            let callback = SelectorInvoker {
+                self.completeBridge(result, fallbackTitle: fallbackTitle, completion: completion)
             }
-
-            DispatchQueue.main.async { [weak self] in
-                if case let .failure(error) = result {
-                    self?.present(error: error, title: fallbackTitle)
-                }
-                completion(result)
-            }
+            callback.performSelector(onMainThread: #selector(SelectorInvoker.invoke), with: nil, waitUntilDone: false)
         }
+        worker.performSelector(inBackground: #selector(SelectorInvoker.invoke), with: nil)
+    }
+
+    private func completeBridge<T>(
+        _ result: Result<T, Error>,
+        fallbackTitle: String,
+        completion: @escaping (Result<T, Error>) -> Void
+    ) {
+        if case let .failure(error) = result {
+            present(error: error, title: fallbackTitle)
+        }
+        completion(result)
     }
 
     private func bindBridgeNotifications() {

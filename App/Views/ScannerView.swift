@@ -109,12 +109,18 @@ final class ScannerViewController: WFScrollStackViewController {
     private func makeScannerView() -> WFVisualPairingScannerView {
         let view = WFVisualPairingScannerView()
         view.scanHandler = { [weak self] result in
-            DispatchQueue.main.async {
-                self?.handleScan(result)
-            }
+            self?.performSelector(
+                onMainThread: #selector(ScannerViewController.handleScanSelector(_:)),
+                with: result as NSDictionary,
+                waitUntilDone: false
+            )
         }
         scannerView = view
         return view
+    }
+
+    @objc private func handleScanSelector(_ result: NSDictionary) {
+        handleScan(result as? [String: Any] ?? [:])
     }
 
     private func handleScan(_ result: [String: Any]) {
@@ -138,15 +144,21 @@ final class ScannerViewController: WFScrollStackViewController {
         authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         if authorizationStatus == .notDetermined {
             AVCaptureDevice.requestAccess(for: .video) { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-                    self?.render()
-                    self?.startScanningIfNeeded()
-                }
+                self?.performSelector(
+                    onMainThread: #selector(ScannerViewController.refreshAuthorizationStatusAfterPrompt),
+                    with: nil,
+                    waitUntilDone: false
+                )
             }
         } else {
             render()
         }
+    }
+
+    @objc private func refreshAuthorizationStatusAfterPrompt() {
+        authorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        render()
+        startScanningIfNeeded()
     }
 
     private func startScanningIfNeeded() {

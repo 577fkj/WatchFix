@@ -175,10 +175,28 @@ static void WFPMWShowAlert(NSString *message) {
                                              style:UIAlertActionStyleDefault
                                            handler:nil]];
     UIWindow *keyWindow = nil;
-    for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+    for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
         if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-            keyWindow = [(UIWindowScene *)scene keyWindow];
+            for (UIWindow *window in ((UIWindowScene *)scene).windows) {
+                if (window.isKeyWindow) {
+                    keyWindow = window;
+                    break;
+                }
+            }
+        }
+        if (keyWindow) {
             break;
+        }
+    }
+    if (!keyWindow) {
+        for (UIScene *scene in [UIApplication sharedApplication].connectedScenes) {
+            if (![scene isKindOfClass:[UIWindowScene class]]) {
+                continue;
+            }
+            keyWindow = ((UIWindowScene *)scene).windows.firstObject;
+            if (keyWindow) {
+                break;
+            }
         }
     }
     UIViewController *rootVC = keyWindow.rootViewController;

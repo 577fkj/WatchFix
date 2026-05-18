@@ -1,6 +1,12 @@
 #import <Foundation/Foundation.h>
 #include <dlfcn.h>
+
+#if defined(THEOS_PACKAGE_SCHEME_ROOTFUL) && THEOS_PACKAGE_SCHEME_ROOTFUL
+#define jbroot(path) (path)
+#else
 #include <roothide.h>
+#endif
+
 #include "PluginConfig.h"
 
 static NSString *const kWFStateRelativePath = @"/var/mobile/Library/Preferences/cn.fkj233.watchfix.plist";

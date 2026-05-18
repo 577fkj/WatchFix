@@ -6,4 +6,4 @@ Description: Fix Apple watch connection issues
 Maintainer: 577FKJ
 Author: 577FKJ
 Section: Tweaks
-Depends: firmware (>= 15.0), mobilesubstrate, preferenceloader
+Depends: firmware (>= 14.0), mobilesubstrate, preferenceloader

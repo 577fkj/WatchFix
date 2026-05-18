@@ -29,6 +29,18 @@ private enum PluginConfigurationControlType {
     static let toggle = "toggle"
 }
 
+private final class PluginConfigurationSelectorInvoker: NSObject {
+    private let action: () -> Void
+
+    init(action: @escaping () -> Void) {
+        self.action = action
+    }
+
+    @objc func invoke() {
+        action()
+    }
+}
+
 final class PluginConfigurationViewController: WFScrollStackViewController {
     private let pluginIdentifier: String
     private let initialPlugin: PluginState
@@ -276,11 +288,7 @@ final class PluginConfigurationViewController: WFScrollStackViewController {
         isSavingConfiguration = true
         render()
 
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self else {
-                return
-            }
-
+        let worker = PluginConfigurationSelectorInvoker {
             let result: Result<Void, Error>
             do {
                 try WFPluginBridge.saveConfiguration(payload, forPluginNamed: self.pluginIdentifier)
@@ -289,27 +297,29 @@ final class PluginConfigurationViewController: WFScrollStackViewController {
                 result = .failure(error)
             }
 
-            DispatchQueue.main.async { [weak self] in
-                guard let self else {
-                    return
-                }
-
-                self.isSavingConfiguration = false
-                switch result {
-                case .success:
-                    self.reloadConfiguration()
-                    self.store.loadPairingSettings()
-                    self.store.refreshCurrentCompatibility(resetLatestUpdate: false)
-                    self.store.alert = Alert(
-                        title: L("alert.success.title"),
-                        message: L("alert.settingsSaved.message")
-                    )
-                case let .failure(error):
-                    self.store.alert = Alert(title: self.pageTitle(plugin: self.currentPlugin), message: error.localizedDescription)
-                }
-                self.render()
+            let callback = PluginConfigurationSelectorInvoker {
+                self.completeSaveConfiguration(result)
             }
+            callback.performSelector(onMainThread: #selector(PluginConfigurationSelectorInvoker.invoke), with: nil, waitUntilDone: false)
         }
+        worker.performSelector(inBackground: #selector(PluginConfigurationSelectorInvoker.invoke), with: nil)
+    }
+
+    private func completeSaveConfiguration(_ result: Result<Void, Error>) {
+        isSavingConfiguration = false
+        switch result {
+        case .success:
+            reloadConfiguration()
+            store.loadPairingSettings()
+            store.refreshCurrentCompatibility(resetLatestUpdate: false)
+            store.alert = Alert(
+                title: L("alert.success.title"),
+                message: L("alert.settingsSaved.message")
+            )
+        case let .failure(error):
+            store.alert = Alert(title: pageTitle(plugin: currentPlugin), message: error.localizedDescription)
+        }
+        render()
     }
 
     private func restoreSavedConfiguration() {

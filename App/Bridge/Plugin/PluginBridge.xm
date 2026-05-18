@@ -11,7 +11,12 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#if defined(THEOS_PACKAGE_SCHEME_ROOTFUL) && THEOS_PACKAGE_SCHEME_ROOTFUL
+#define jbroot(path) (path)
+#else
 #include <roothide.h>
+#endif
 
 static NSString *const kStateRelativePath = @"/var/mobile/Library/Preferences/cn.fkj233.watchfix.plist";
 static NSString *const kPluginStatesKey = @"PluginStates";

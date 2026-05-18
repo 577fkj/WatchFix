@@ -40,7 +40,9 @@ jobs:
         uses: actions/checkout@main
         with:
           repository: theos/sdks
-          sparse-checkout: iPhoneOS16.5.sdk
+          sparse-checkout: |
+            iPhoneOS14.5.sdk
+            iPhoneOS16.5.sdk
           path: theos/sdks
       
       - name: Install Dependencies
@@ -83,8 +85,25 @@ jobs:
           retention-days: 15
           archive: false
 
+      - name: Build Rootful Package
+        id: build_rootful
+        if: steps.install_deps.outcome == 'success'
+        env:
+          THEOS: theos
+        run: |
+          gmake clean package FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=
+
+      - name: Upload a Rootful Build Artifact
+        if: steps.build_rootful.outcome == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: rootful-package
+          path: packages/rootful/*.deb
+          retention-days: 15
+          archive: false
+
       - name: Create GitHub Release
-        if: steps.build_roothide.outcome == 'success' && startsWith(github.ref, 'refs/tags/v')
+        if: steps.build_rootless.outcome == 'success' && steps.build_roothide.outcome == 'success' && steps.build_rootful.outcome == 'success' && startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
@@ -94,3 +113,4 @@ jobs:
           files: |
             packages/rootless/*.deb
             packages/roothide/*.deb
+            packages/rootful/*.deb

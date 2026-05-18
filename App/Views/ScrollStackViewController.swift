@@ -80,12 +80,11 @@ class WFScrollStackViewController: UIViewController {
         }
 
         renderScheduled = true
-        DispatchQueue.main.async { [weak self] in
-            guard let self else {
-                return
-            }
-            self.renderScheduled = false
-            self.render()
-        }
+        perform(#selector(performScheduledRender), with: nil, afterDelay: 0)
+    }
+
+    @objc private func performScheduledRender() {
+        renderScheduled = false
+        render()
     }
 }

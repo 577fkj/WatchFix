@@ -38,7 +38,7 @@ The other functions of the plugin are still not perfect at present. I am not fam
 ## Sponsor
 
 - [Patreon](https://patreon.com/577FKJ)
-- [爱发电](https://afdian.tv/a/577fkj)
+- [爱发电](https://afdian.com/a/577fkj)
 
 ## Build
 

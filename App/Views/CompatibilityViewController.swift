@@ -129,7 +129,7 @@ final class CompatibilityViewController: WFScrollStackViewController {
                     WFMakeActionButton(
                         title: L("scanner.permission.button"),
                         systemImage: "camera.viewfinder"
-                    ) { [weak self] in
+                    ) {
                         if let url = URL(string: UIApplication.openSettingsURLString) {
                             UIApplication.shared.open(url)
                         }
@@ -202,12 +202,18 @@ final class CompatibilityViewController: WFScrollStackViewController {
     private func makeInlineScannerView() -> WFVisualPairingScannerView {
         let view = WFVisualPairingScannerView()
         view.scanHandler = { [weak self] result in
-            DispatchQueue.main.async {
-                self?.handleInlineScan(result)
-            }
+            self?.performSelector(
+                onMainThread: #selector(CompatibilityViewController.handleInlineScanSelector(_:)),
+                with: result as NSDictionary,
+                waitUntilDone: false
+            )
         }
         inlineScannerView = view
         return view
+    }
+
+    @objc private func handleInlineScanSelector(_ result: NSDictionary) {
+        handleInlineScan(result as? [String: Any] ?? [:])
     }
 
     private func handleInlineScan(_ result: [String: Any]) {
@@ -231,12 +237,18 @@ final class CompatibilityViewController: WFScrollStackViewController {
         cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         if cameraAuthorizationStatus == .notDetermined {
             AVCaptureDevice.requestAccess(for: .video) { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-                    self?.render()
-                }
+                self?.performSelector(
+                    onMainThread: #selector(CompatibilityViewController.refreshCameraAuthorizationStatus),
+                    with: nil,
+                    waitUntilDone: false
+                )
             }
         }
+        render()
+    }
+
+    @objc private func refreshCameraAuthorizationStatus() {
+        cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         render()
     }
 
