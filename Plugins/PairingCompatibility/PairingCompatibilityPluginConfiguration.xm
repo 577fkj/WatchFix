@@ -117,24 +117,6 @@ static NSDictionary<NSString *, id> *WFPairingNormalizedConfiguration(NSDictiona
     };
 }
 
-static void WFPairingSetPreferenceValue(CFStringRef appID, CFStringRef key, CFPropertyListRef value, CFStringRef user, CFStringRef host) {
-    CFPreferencesSetValue(key, value, appID, user, host);
-}
-
-static BOOL WFPairingSynchronizePreferences(CFStringRef appID, CFStringRef user, CFStringRef host, NSError **error) {
-    if (CFPreferencesSynchronize(appID, user, host)) {
-        return YES;
-    }
-
-    if (error) {
-        NSString *identifier = CFBridgingRelease(CFStringCreateCopy(kCFAllocatorDefault, appID));
-        *error = [NSError errorWithDomain:@"cn.fkj233.watchfix.app"
-                                     code:2001
-                                 userInfo:@{NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unable to synchronize preferences for %@", identifier ?: @"unknown domain"]}];
-    }
-    return NO;
-}
-
 static NSMutableDictionary *WFPairingMutablePreferencesDictionary(NSString *path, BOOL createIfMissing) {
     NSMutableDictionary *dictionary = [[NSMutableDictionary alloc] initWithContentsOfFile:path];
     if (!dictionary && createIfMissing) {
@@ -161,39 +143,17 @@ static BOOL WFPairingWritePreferencesDictionary(NSMutableDictionary *dictionary,
 }
 
 static BOOL WFPairingApplyNanoRegistrySupportRange(BOOL enabled, NSDictionary<NSString *, id> *configuration, NSError **error) {
-    CFStringRef domain = CFSTR("com.apple.NanoRegistry");
     NSInteger minVersion = WFPairingConfigurationIntegerValue(configuration, kPairingMinKey, kDeviceSupportRangeMinCompatibilityVersion);
     NSInteger maxVersion = WFPairingConfigurationIntegerValue(configuration, kPairingMaxKey, kDeviceSupportRangeMaxCompatibilityVersion);
     NSNumber *minValue = @(minVersion);
     NSNumber *maxValue = @(maxVersion);
     NSString *chipIDsString = WFPairingStringValue(configuration[kChipIDsKey]) ?: @"";
-    CFPropertyListRef chipIDsValue = enabled ? (__bridge CFPropertyListRef)chipIDsString : NULL;
-    CFPropertyListRef minCompatibilityValue = enabled ? (__bridge CFPropertyListRef)minValue : NULL;
-    CFPropertyListRef maxCompatibilityValue = enabled ? (__bridge CFPropertyListRef)maxValue : NULL;
 
-    WFPairingSetPreferenceValue(domain, CFSTR("minPairingCompatibilityVersion"), minCompatibilityValue, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("maxPairingCompatibilityVersion"), maxCompatibilityValue, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("IOS_PAIRING_EOL_MIN_PAIRING_COMPATIBILITY_VERSION_CHIPIDS"), chipIDsValue, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("minPairingCompatibilityVersionWithChipID"), minCompatibilityValue, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-
-    WFPairingSetPreferenceValue(domain, CFSTR("minPairingCompatibilityVersion"), minCompatibilityValue, kCFPreferencesAnyUser, kCFPreferencesCurrentHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("maxPairingCompatibilityVersion"), maxCompatibilityValue, kCFPreferencesAnyUser, kCFPreferencesCurrentHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("IOS_PAIRING_EOL_MIN_PAIRING_COMPATIBILITY_VERSION_CHIPIDS"), chipIDsValue, kCFPreferencesAnyUser, kCFPreferencesCurrentHost);
-    WFPairingSetPreferenceValue(domain, CFSTR("minPairingCompatibilityVersionWithChipID"), minCompatibilityValue, kCFPreferencesAnyUser, kCFPreferencesCurrentHost);
-
-    if (!WFPairingSynchronizePreferences(domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost, error)) {
-        // return NO;
-        NSString *desc = error ? (*error).localizedDescription : @"unknown error";
-        Log(@"Warning: Failed to synchronize NanoRegistry preferences for current user/any host: %@", desc);
-        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"NanoRegistry sync (cu/ah): %@", desc] delay:0];
-    }
-    if (!WFPairingSynchronizePreferences(domain, kCFPreferencesAnyUser, kCFPreferencesCurrentHost, error)) {
-        // return NO;
-        NSString *desc = error ? (*error).localizedDescription : @"unknown error";
-        Log(@"Warning: Failed to synchronize NanoRegistry preferences for any user/current host: %@", desc);
-        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"NanoRegistry sync (au/ch): %@", desc] delay:1.5];
-    }
-
+    // Persist directly to NanoRegistry's mobile preference file. The previous
+    // CurrentUser/AnyHost and AnyUser/CurrentHost CFPreferences domains can
+    // reject synchronization from the WatchFix app process on modern iOS,
+    // producing a misleading sync error even though the file-backed values are
+    // the settings NanoRegistry actually consumes.
     NSMutableDictionary *dictionary = WFPairingMutablePreferencesDictionary(kNanoRegistryPreferencesPath, enabled);
     if (enabled) {
         dictionary[@"minPairingCompatibilityVersion"] = minValue;
@@ -207,24 +167,14 @@ static BOOL WFPairingApplyNanoRegistrySupportRange(BOOL enabled, NSDictionary<NS
         [dictionary removeObjectForKey:@"minPairingCompatibilityVersionWithChipID"];
     }
 
-    if (!WFPairingWritePreferencesDictionary(dictionary, kNanoRegistryPreferencesPath, error)) {
-        NSString *desc = error ? (*error).localizedDescription : @"unknown error";
-        Log(@"Warning: Failed to write NanoRegistry preferences file: %@", desc);
-        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"NanoRegistry write: %@", desc] delay:3.0];
-    }
-
-    return YES;
+    return WFPairingWritePreferencesDictionary(dictionary, kNanoRegistryPreferencesPath, error);
 }
 
 static BOOL WFPairingApplyPairedSyncSupportRange(BOOL enabled, NSError **error) {
-    CFStringRef domain = CFSTR("com.apple.pairedsync");
     NSNumber *activityTimeout = @(kDeviceSupportRangeActivityTimeout);
-    CFPropertyListRef value = enabled ? (__bridge CFPropertyListRef)activityTimeout : NULL;
-    WFPairingSetPreferenceValue(domain, CFSTR("activityTimeout"), value, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    if (!WFPairingSynchronizePreferences(domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost, error)) {
-        return NO;
-    }
 
+    // Use the same deterministic file-backed persistence path as NanoRegistry
+    // instead of the unsupported CurrentUser/AnyHost synchronization path.
     NSMutableDictionary *dictionary = WFPairingMutablePreferencesDictionary(kPairedSyncPreferencesPath, enabled);
     if (enabled) {
         dictionary[@"activityTimeout"] = activityTimeout;
@@ -270,26 +220,59 @@ static BOOL WFPairingApplyMobileAssetSupport(BOOL enabled, NSError **error) {
 
 static BOOL WFPairingApplyDeviceSupportRange(BOOL enabled, NSDictionary<NSString *, id> *configuration, NSError **error) {
     NSTimeInterval bannerDelay = 0;
+    BOOL preferenceWritesSucceeded = YES;
+    NSError *firstPreferenceError = nil;
+
     NSError *subError = nil;
     if (!WFPairingApplyNanoRegistrySupportRange(enabled, configuration, &subError)) {
+        preferenceWritesSucceeded = NO;
+        firstPreferenceError = subError;
         NSString *desc = subError.localizedDescription ?: @"unknown error";
-        Log(@"Failed to apply NanoRegistry support range: %@", desc);
-        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"NanoRegistry: %@", desc] delay:bannerDelay];
+        Log(@"Failed to write NanoRegistry preferences: %@", desc);
+        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"NanoRegistry write: %@", desc] delay:bannerDelay];
         bannerDelay += 1.5;
     }
+
     subError = nil;
     if (!WFPairingApplyPairedSyncSupportRange(enabled, &subError)) {
+        preferenceWritesSucceeded = NO;
+        if (!firstPreferenceError) {
+            firstPreferenceError = subError;
+        }
         NSString *desc = subError.localizedDescription ?: @"unknown error";
-        Log(@"Failed to apply PairedSync support range: %@", desc);
-        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"PairedSync: %@", desc] delay:bannerDelay];
+        Log(@"Failed to write PairedSync preferences: %@", desc);
+        [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"PairedSync write: %@", desc] delay:bannerDelay];
         bannerDelay += 1.5;
     }
+
     subError = nil;
     if (!WFPairingApplyMobileAssetSupport(enabled, &subError)) {
         NSString *desc = subError.localizedDescription ?: @"unknown error";
         Log(@"Failed to apply MobileAsset support changes: %@", desc);
         [WFPluginBridge showWarningBannerWithMessage:[NSString stringWithFormat:@"MobileAsset: %@", desc] delay:bannerDelay];
     }
+
+    if (!preferenceWritesSucceeded) {
+        if (error) {
+            *error = firstPreferenceError ?: [NSError errorWithDomain:@"cn.fkj233.watchfix.app"
+                                                         code:2003
+                                                     userInfo:@{NSLocalizedDescriptionKey: @"Unable to persist pairing compatibility preferences"}];
+        }
+        return NO;
+    }
+
+    // Reload only the daemons that consume NanoRegistry / pairedsync preferences.
+    // A restart failure does not invalidate a successful preference write; the
+    // existing manual "restart Watch services" action remains available as a fallback.
+    NSError *restartError = nil;
+    NSArray<NSString *> *reloadTargets = @[@"nanoregistryd", @"pairedsyncd", @"nanoregistrylaunchd"];
+    if (![WFPluginBridge restartExecutablesNamed:reloadTargets error:&restartError]) {
+        Log(@"Warning: Pairing preferences were written, but targeted service restart failed: %@",
+            restartError.localizedDescription ?: @"unknown error");
+    } else {
+        Log(@"Reloaded pairing preference consumers after %@ support range", enabled ? @"applying" : @"removing");
+    }
+
     return YES;
 }
 

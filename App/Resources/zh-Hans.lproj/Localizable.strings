@@ -5,6 +5,7 @@
 "common.defaults" = "使用默认值";
 "common.install" = "安装";
 "common.installAll" = "安装全部";
+"common.update" = "更新";
 "common.restore" = "恢复已保存值";
 "common.save" = "保存";
 "common.yes" = "是";

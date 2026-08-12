@@ -163,9 +163,15 @@ final class FeatureViewController: WFScrollStackViewController {
             }
             : nil
 
+        let isUpdate = plugin.available && plugin.needsUpdate
+
         return WFMakePluginCard(
             plugin: plugin,
             isBusy: store.isPluginBusy(plugin.id),
+            actionTitle: isUpdate ? L("common.update") : nil,
+            systemImage: isUpdate ? "arrow.triangle.2.circlepath" : nil,
+            isPrimary: isUpdate ? true : nil,
+            tintColor: isUpdate ? .systemBlue : nil,
             configurationTitle: L("features.plugins.configure"),
             configurationSystemImage: "slider.horizontal.3",
             isConfigurationEnabled: plugin.metadata.hasConfigurationInterface,
@@ -176,9 +182,11 @@ final class FeatureViewController: WFScrollStackViewController {
     }
 
     private func performPluginAction(for plugin: PluginState) {
-        if plugin.available {
+        if plugin.available && !plugin.needsUpdate {
             store.removePlugin(identifier: plugin.id)
         } else {
+            // Reinstalling an outdated plugin refreshes both the plugin binary and
+            // generated injection metadata while preserving the installed state.
             store.installPlugin(identifier: plugin.id)
         }
     }

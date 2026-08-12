@@ -1447,6 +1447,47 @@ static BOOL RestartWatchServices(NSError **error) {
     return YES;
 }
 
++ (BOOL)restartExecutablesNamed:(NSArray<NSString *> *)processNames error:(NSError * _Nullable __autoreleasing *)error {
+    NSMutableOrderedSet<NSString *> *targets = [NSMutableOrderedSet orderedSet];
+    for (id value in processNames ?: @[]) {
+        NSString *name = StringOrNil(value);
+        if (name.length > 0) {
+            [targets addObject:name];
+        }
+    }
+
+    for (NSString *target in targets) {
+        NSError *lookupError = nil;
+        NSArray<NSNumber *> *pids = RunningProcessIdentifiersNamed(target, &lookupError);
+        if (!pids) {
+            if (error) {
+                *error = lookupError ?: BridgeError(55, [NSString stringWithFormat:@"Unable to enumerate running instances for %@", target]);
+            }
+            return NO;
+        }
+
+        if (pids.count == 0) {
+            AppendLog([NSString stringWithFormat:@"Targeted restart: %@ is not currently running", target]);
+            continue;
+        }
+
+        for (NSNumber *pidValue in pids) {
+            NSError *terminateError = nil;
+            if (!ExecuteTerminateRequestForProcessIdentifier(pidValue.intValue, target, &terminateError)) {
+                if (error) {
+                    *error = terminateError ?: BridgeError(55, [NSString stringWithFormat:@"Unable to terminate %@", target]);
+                }
+                return NO;
+            }
+        }
+    }
+
+    if (targets.count > 0) {
+        AppendLog([NSString stringWithFormat:@"Restarted targeted services: %@", [[targets array] componentsJoinedByString:@", "]]);
+    }
+    return YES;
+}
+
 + (UIImage *)pluginIconForScopeIdentifier:(NSString *)scopeIdentifier {
     if (scopeIdentifier.length == 0) {
         return nil;

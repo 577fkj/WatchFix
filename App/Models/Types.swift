@@ -597,7 +597,10 @@ enum Catalog {
             return true
         }
 
-        return installedBuildVersion != metadata.buildVersion
+        return installedBuildVersion.compare(
+            metadata.buildVersion,
+            options: [.numeric, .caseInsensitive]
+        ) == .orderedAscending
     }
 
     private static func formattedVersion(_ encodedVersion: Int) -> String {

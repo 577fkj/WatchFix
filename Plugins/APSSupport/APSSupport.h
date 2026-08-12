@@ -10,8 +10,6 @@
 
 @interface APSProxyClient : NSObject
 - (BOOL)isActive;
-- (BOOL)isConnectedOnInterface:(int)interface;
-- (BOOL)needsToDisconnectOnInterface:(int)interface;
 - (APSIDSProxyManager *)proxyManager;
 - (void)incomingPresenceWithCertificate:(NSData *)certificate
                                   nonce:(NSData *)nonce

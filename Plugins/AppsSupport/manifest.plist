@@ -11,13 +11,12 @@
 		<key>WFPluginInjectionTargets</key>
 		<dict>
 			<key>Bundles</key>
-			<array>
-				<string>com.apple.InstalledContentLibrary</string>
-			</array>
+			<array/>
 			<key>Executables</key>
 			<array>
 				<string>installd</string>
 				<string>appconduitd</string>
+				<string>MobileInstallationHelperService</string>
 				<string>com.apple.MobileInstallationHelperService</string>
 			</array>
 		</dict>
@@ -33,6 +32,7 @@
 		<array>
 			<string>installd</string>
 			<string>appconduitd</string>
+			<string>MobileInstallationHelperService</string>
 			<string>com.apple.MobileInstallationHelperService</string>
 		</array>
 		<key>WFPluginScopeIdentifier</key>

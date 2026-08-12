@@ -13,9 +13,7 @@
 		<key>WFPluginInjectionTargets</key>
 		<dict>
 			<key>Bundles</key>
-			<array>
-				<string>com.apple.private.NanoRegistry</string>
-			</array>
+			<array/>
 			<key>Executables</key>
 			<array>
 				<string>SpringBoard</string>

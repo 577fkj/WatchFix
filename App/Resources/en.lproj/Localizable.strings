@@ -5,6 +5,7 @@
 "common.defaults" = "Use Defaults";
 "common.install" = "Install";
 "common.installAll" = "Install All";
+"common.update" = "Update";
 "common.restore" = "Restore Saved";
 "common.save" = "Save";
 "common.yes" = "Yes";
